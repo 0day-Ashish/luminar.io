@@ -1,0 +1,16 @@
+{
+  "name": "luminar-oracle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Luminar KYC Oracle — verifies identity documents and issues Poseidon2 commitments",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "circomlibjs": "^0.1.7"
+  }
+}

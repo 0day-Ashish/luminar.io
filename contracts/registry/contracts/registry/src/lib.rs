@@ -1,0 +1,164 @@
+#![no_std]
+use soroban_sdk::{
+    contract, contracterror, contractimpl, contracttype, Address, Bytes, BytesN, Env,
+};
+
+mod verifier {
+    soroban_sdk::contractimport!(
+        file = "../../../verifier/ultrahonk_soroban_contract/target/wasm32v1-none/release/ultrahonk_soroban_contract.wasm"
+    );
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub enum DataKey {
+    VerifierContract,
+    Owner,
+    Credential(Address),
+    Nullifier(BytesN<32>),
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct KYCCredential {
+    pub holder: Address,
+    pub commitment: BytesN<32>,
+    pub issued_at: u64,
+    pub min_age_secs: u64,
+    pub active: bool,
+}
+
+#[contracterror]
+#[repr(u32)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum Error {
+    AlreadyInitialized = 1,
+    NotInitialized = 2,
+    NotOwner = 3,
+    AlreadyVerified = 4,
+    NullifierUsed = 5,
+    VerificationFailed = 6,
+    NotVerified = 7,
+}
+
+#[contract]
+pub struct RegistryContract;
+
+#[contractimpl]
+impl RegistryContract {
+    /// Initialize the registry with an owner and the address of the deployed verifier contract.
+    pub fn initialize(env: Env, owner: Address, verifier_contract: Address) -> Result<(), Error> {
+        if env.storage().instance().has(&DataKey::Owner) {
+            return Err(Error::AlreadyInitialized);
+        }
+        owner.require_auth();
+
+        env.storage().instance().set(&DataKey::Owner, &owner);
+        env.storage()
+            .instance()
+            .set(&DataKey::VerifierContract, &verifier_contract);
+        Ok(())
+    }
+
+    /// Register a user's KYC credential by verifying their ZK proof on-chain via the verifier contract.
+    pub fn register(
+        env: Env,
+        user: Address,
+        proof: Bytes,
+        public_inputs: Bytes,
+        commitment: BytesN<32>,
+        nullifier: BytesN<32>,
+        min_age_secs: u64,
+    ) -> Result<(), Error> {
+        user.require_auth();
+
+        // Ensure the contract is initialized
+        if !env.storage().instance().has(&DataKey::Owner) {
+            return Err(Error::NotInitialized);
+        }
+
+        // Prevent duplicate registration
+        if env
+            .storage()
+            .persistent()
+            .has(&DataKey::Credential(user.clone()))
+        {
+            return Err(Error::AlreadyVerified);
+        }
+
+        // Prevent nullifier reuse (double-spend protection)
+        if env
+            .storage()
+            .persistent()
+            .has(&DataKey::Nullifier(nullifier.clone()))
+        {
+            return Err(Error::NullifierUsed);
+        }
+
+        // Cross-contract call to the verifier to validate the ZK proof
+        let verifier_address: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::VerifierContract)
+            .ok_or(Error::NotInitialized)?;
+
+        let verifier_client = verifier::Client::new(&env, &verifier_address);
+        match verifier_client.try_verify_proof(&public_inputs, &proof) {
+            Ok(Ok(())) => {}
+            _ => return Err(Error::VerificationFailed),
+        }
+
+        // Store the nullifier to prevent reuse
+        env.storage()
+            .persistent()
+            .set(&DataKey::Nullifier(nullifier), &true);
+
+        // Store the credential
+        let credential = KYCCredential {
+            holder: user.clone(),
+            commitment,
+            issued_at: env.ledger().timestamp(),
+            min_age_secs,
+            active: true,
+        };
+        env.storage()
+            .persistent()
+            .set(&DataKey::Credential(user), &credential);
+
+        Ok(())
+    }
+
+    /// Check whether a user has a verified and active KYC credential.
+    pub fn is_verified(env: Env, user: Address) -> bool {
+        env.storage()
+            .persistent()
+            .get::<_, KYCCredential>(&DataKey::Credential(user))
+            .map(|cred| cred.active)
+            .unwrap_or(false)
+    }
+
+    /// Revoke a user's KYC credential. Only the contract owner may call this.
+    pub fn revoke(env: Env, user: Address) -> Result<(), Error> {
+        let owner: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Owner)
+            .ok_or(Error::NotInitialized)?;
+        owner.require_auth();
+
+        let mut credential: KYCCredential = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Credential(user.clone()))
+            .ok_or(Error::NotVerified)?;
+
+        credential.active = false;
+        env.storage()
+            .persistent()
+            .set(&DataKey::Credential(user), &credential);
+
+        Ok(())
+    }
+}
+
+mod test;

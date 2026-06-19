@@ -1,0 +1,12 @@
+# Private inputs
+name_hash = "0x1234"
+id_hash = "0x5678"
+dob_timestamp = "0"
+secret = "0xabcd"
+
+# Public inputs
+commitment = "0x0b42852e21a45e535f4093674dd7002683c720ce37d26b339c7b255f0b545a02"
+nullifier = "0x263e9e9820d091699b182811307caf8f867a3d07b234d3328e925bd2919521ab"
+stellar_address = "0xdead"
+current_timestamp = "946728000"
+min_age_secs = "567648000"
