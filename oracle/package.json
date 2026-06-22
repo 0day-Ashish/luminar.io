@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "express": "^4.21.0",
-    "cors": "^2.8.5",
-    "circomlibjs": "^0.1.7"
+    "cors": "^2.8.5"
   }
 }

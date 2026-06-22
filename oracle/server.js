@@ -1,7 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
-const { buildPoseidon } = require("circomlibjs");
+
+// BN254 (alt_bn128) scalar field prime — all field elements are reduced mod this
+const BN254_PRIME = BigInt(
+  "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+);
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -18,23 +22,15 @@ if (!ORACLE_SECRET_KEY) {
   process.exit(1);
 }
 
-// ---------------------------------------------------------------------------
-// Poseidon singleton — built once at startup
-// ---------------------------------------------------------------------------
-let poseidon = null;
 
-async function initPoseidon() {
-  poseidon = await buildPoseidon();
-  console.log("Poseidon hash function initialised.");
-}
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Convert a Buffer / Uint8Array to a BigInt. */
+/** Convert a Buffer / Uint8Array to a BigInt reduced mod BN254 prime. */
 function bufferToBigInt(buf) {
-  return BigInt("0x" + Buffer.from(buf).toString("hex"));
+  return BigInt("0x" + Buffer.from(buf).toString("hex")) % BN254_PRIME;
 }
 
 /**
@@ -75,7 +71,7 @@ app.get("/health", (_req, res) => {
 });
 
 // ---- POST /verify ---------------------------------------------------------
-app.post("/verify", async (req, res) => {
+app.post("/verify", (req, res) => {
   try {
     const { name, dob, id_number, country } = req.body;
 
@@ -130,42 +126,33 @@ app.post("/verify", async (req, res) => {
     const secretBytes = crypto.randomBytes(32);
 
     // ------------------------------------------------------------------
-    // 6. Compute Poseidon commitment
-    //    commitment = Poseidon([sha256(name), sha256(id_number),
-    //                           dob_unix_timestamp, secret])
-    //
-    //    All inputs are converted to BigInt field elements over BN254.
+    // 6. Reduce to BN254 field elements
+    //    The frontend will compute the Poseidon commitment from these.
     // ------------------------------------------------------------------
     const nameHashField = bufferToBigInt(nameHash);
     const idHashField = bufferToBigInt(idHash);
     const secretField = bufferToBigInt(secretBytes);
-    const dobField = BigInt(dobTimestamp);
 
-    const commitmentRaw = poseidon([
-      nameHashField,
-      idHashField,
-      dobField,
-      secretField,
-    ]);
-
-    // Convert the field element to a 0x-prefixed hex string (32 bytes / 64 hex chars)
-    const commitmentHex =
-      "0x" + poseidon.F.toString(commitmentRaw, 16).padStart(64, "0");
+    const nameHashHex = "0x" + nameHashField.toString(16).padStart(64, "0");
+    const idHashHex = "0x" + idHashField.toString(16).padStart(64, "0");
+    const secretHex = "0x" + secretField.toString(16).padStart(64, "0");
 
     // ------------------------------------------------------------------
-    // 7. Sign the commitment with HMAC-SHA256
+    // 7. Sign the payload with HMAC-SHA256
     // ------------------------------------------------------------------
+    const signaturePayload = `${nameHashHex}:${idHashHex}:${secretHex}:${dobTimestamp}`;
     const oracleSignature = crypto
       .createHmac("sha256", ORACLE_SECRET_KEY)
-      .update(commitmentHex)
+      .update(signaturePayload)
       .digest("hex");
 
     // ------------------------------------------------------------------
     // 8. Return the credential payload
     // ------------------------------------------------------------------
     return res.json({
-      commitment: commitmentHex,
-      secret: "0x" + secretBytes.toString("hex"),
+      name_hash: nameHashHex,
+      id_hash: idHashHex,
+      secret: secretHex,
       dob_timestamp: dobTimestamp,
       oracle_signature: oracleSignature,
     });
@@ -178,17 +165,8 @@ app.post("/verify", async (req, res) => {
 // ---------------------------------------------------------------------------
 // Startup
 // ---------------------------------------------------------------------------
-async function main() {
-  await initPoseidon();
-
-  app.listen(PORT, () => {
-    console.log(`Luminar Oracle running → http://localhost:${PORT}`);
-    console.log(`  POST /verify   — issue a KYC commitment`);
-    console.log(`  GET  /health   — liveness check`);
-  });
-}
-
-main().catch((err) => {
-  console.error("Failed to start oracle server:", err);
-  process.exit(1);
+app.listen(PORT, () => {
+  console.log(`Luminar Oracle running → http://localhost:${PORT}`);
+  console.log(`  POST /verify   — issue KYC hashes + secret`);
+  console.log(`  GET  /health   — liveness check`);
 });

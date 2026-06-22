@@ -1,3 +1,10 @@
 @import "tailwindcss";
 
+@config "../tailwind.config.ts";
+
+@theme {
+  --color-luminar: #7F77DD;
+  --font-cabinet: var(--font-cabinet);
+  --font-zodiak: var(--font-zodiak);
+}
 
