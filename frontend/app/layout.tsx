@@ -6,6 +6,7 @@ import WalletButton from "../components/WalletButton";
 import Link from "next/link";
 import Footer from "../components/Footer";
 import { ReactLenis } from "lenis/react";
+import { WalletProvider } from "../context/WalletContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,9 +44,10 @@ export default function RootLayout({
       className={`${cabinetGrotesk.variable} ${zodiak.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#F2F0EF] text-slate-900 selection:bg-luminar/25 selection:text-slate-900 font-cabinet">
-        <ReactLenis root>
-          {/* Sticky Reveal Wrapper */}
-          <div className="relative z-10 bg-[#F2F0EF] shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col min-h-screen ">
+        <WalletProvider>
+          <ReactLenis root>
+            {/* Sticky Reveal Wrapper */}
+            <div className="relative z-10 bg-[#F2F0EF] shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col min-h-screen ">
             <header className="w-full bg-[#F2F0EF] mt-14 sm:mt-16">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16
                flex items-center justify-between">
@@ -89,6 +91,7 @@ export default function RootLayout({
           {/* Footer (Sticky bottom to reveal on scroll) */}
           <Footer />
         </ReactLenis>
+        </WalletProvider>
       </body>
     </html>
   );
