@@ -8,3 +8,29 @@
   --font-zodiak: var(--font-zodiak);
 }
 
+@keyframes scroll-marquee {
+  from {
+    transform: translateX(-15%);
+  }
+  to {
+    transform: translateX(15%);
+  }
+}
+
+.watermark-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+@supports (animation-timeline: scroll()) {
+  .watermark-scroll {
+    animation: scroll-marquee linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+
