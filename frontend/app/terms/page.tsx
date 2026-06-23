@@ -4,7 +4,7 @@ export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-cabinet">
       {/* Title & Header */}
-      <div className="border-b border-slate-200 pb-10 mb-12">
+      <div className="border-b border-slate-300 pb-10 mb-12">
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 font-cabinet mb-4">
           Platform Terms of Service
         </h1>
@@ -29,7 +29,7 @@ export default function TermsPage() {
                 <div className="flex items-start gap-3">
                   <span className="font-bold text-slate-900 shrink-0">1.1.</span>
                   <p>
-                    The definitions and rules of interpretation in this clause 1 apply in this Agreement.
+                    The definitions and rules of interpretation in this clause 1 copy in this Agreement.
                   </p>
                 </div>
 
@@ -80,7 +80,7 @@ export default function TermsPage() {
         </section>
 
         {/* Clause 2: Use of the Platform */}
-        <section className="space-y-6 pt-8 border-t border-slate-200/60">
+        <section className="space-y-6 pt-8 border-t border-slate-300">
           <div className="flex items-start gap-4">
             <span className="text-lg font-bold text-slate-900 leading-none">2.</span>
             <div className="space-y-6 flex-grow">

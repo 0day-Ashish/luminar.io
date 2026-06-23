@@ -135,7 +135,7 @@ export default function Home() {
 
         {/* Input Bar Section matching Luminar's email input exactly */}
         <div className="max-w-md w-full mb-10">
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
+          <div className="flex items-center bg-slate-50 border border-slate-300 rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
             <input
               type="text"
               placeholder="Enter your Stellar public key or email"
@@ -176,7 +176,7 @@ export default function Home() {
         </div>
 
         {/* Mockup Showcase Section - Cream Card Container */}
-        <div className="w-full bg-[#F4F3EF] border border-slate-200 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden shadow-sm relative">
+        <div className="w-full bg-[#F4F3EF] border border-slate-300 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden shadow-sm relative">
           {/* SECURE CHECKING indicator mirroring the Luminar phone screenshot badge */}
           <div className="absolute top-6 right-6 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
@@ -367,7 +367,7 @@ export default function Home() {
 
       {/* Testimonial Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-t border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-t border-b border-slate-300 py-20 md:py-28">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Logo Icon and Badge Row */}
             <div className="flex items-center gap-3 mb-8">
@@ -413,7 +413,7 @@ export default function Home() {
 
       {/* Core Features Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           {/* Header */}
           <div className="mb-12 text-left">
             <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">
@@ -541,7 +541,7 @@ export default function Home() {
 
       {/* Debug Faster Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             
@@ -946,7 +946,7 @@ export default function Home() {
 
       {/* Second Testimonial Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Logo Icon and Badge Row */}
             <div className="flex items-center gap-3 mb-8">
@@ -985,9 +985,9 @@ export default function Home() {
 
       {/* Team Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           {/* Card Container */}
-          <div className="w-full bg-[#F4F3EF] border border-slate-200/50 rounded-3xl p-6 md:p-12 flex flex-col md:flex-row items-stretch justify-between gap-12 overflow-hidden shadow-sm relative">
+          <div className="w-full bg-[#F4F3EF] border border-slate-300 rounded-3xl p-6 md:p-12 flex flex-col md:flex-row items-stretch justify-between gap-12 overflow-hidden shadow-sm relative">
             
             {/* Left Column: Text & Button */}
             <div className="flex flex-col justify-between items-start md:w-1/2 space-y-8 text-left">
@@ -1002,7 +1002,7 @@ export default function Home() {
               
               <Link 
                 href="/careers" 
-                className="px-6 py-2.5 bg-white hover:bg-slate-50 text-slate-900 text-sm font-bold rounded-full transition duration-200 border border-slate-200 shadow-sm inline-flex items-center gap-1.5"
+                className="px-6 py-2.5 bg-white hover:bg-slate-50 text-slate-900 text-sm font-bold rounded-full transition duration-200 border border-slate-300 shadow-sm inline-flex items-center gap-1.5"
               >
                 Careers <span className="text-slate-400 font-normal">→</span>
               </Link>
@@ -1030,11 +1030,11 @@ export default function Home() {
 
       {/* Third Testimonial Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto border-b border-slate-200 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Logo Icon and Badge Row */}
             <div className="flex items-center gap-3 mb-8">
-              <div className="relative w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300">
+              <div className="relative w-14 h-14 bg-white border border-slate-300 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300">
                 {/* Clove leaf SVG */}
                 <svg viewBox="0 0 100 100" className="w-7 h-7 text-slate-900" fill="currentColor">
                   {/* Stem/Base connector */}

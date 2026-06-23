@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        luminar: "#7F77DD",
+        luminar: "#2EA37A",
       },
       fontFamily: {
         cabinet: ["var(--font-cabinet)", "sans-serif"],

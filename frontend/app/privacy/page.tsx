@@ -4,7 +4,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-cabinet">
       {/* Title & Header */}
-      <div className="border-b border-slate-200 pb-10 mb-12">
+      <div className="border-b border-slate-300 pb-10 mb-12">
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 font-cabinet mb-4">
           Privacy Policy
         </h1>
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         </section>
 
         {/* Section 1 */}
-        <section className="space-y-6 pt-6 border-t border-slate-200/60">
+        <section className="space-y-6 pt-6 border-t border-slate-300">
           <div className="flex items-start gap-4">
             <span className="text-lg font-bold text-slate-900 leading-none">1.</span>
             <div className="space-y-4 flex-grow">
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
         </section>
 
         {/* Section 2 */}
-        <section className="space-y-6 pt-8 border-t border-slate-200/60">
+        <section className="space-y-6 pt-8 border-t border-slate-300">
           <div className="flex items-start gap-4">
             <span className="text-lg font-bold text-slate-900 leading-none">2.</span>
             <div className="space-y-4 flex-grow">
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
         </section>
 
         {/* Section 3 */}
-        <section className="space-y-6 pt-8 border-t border-slate-200/60">
+        <section className="space-y-6 pt-8 border-t border-slate-300">
           <div className="flex items-start gap-4">
             <span className="text-lg font-bold text-slate-900 leading-none">3.</span>
             <div className="space-y-4 flex-grow">
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
         </section>
 
         {/* Section 4 */}
-        <section className="space-y-6 pt-8 border-t border-slate-200/60">
+        <section className="space-y-6 pt-8 border-t border-slate-300">
           <div className="flex items-start gap-4">
             <span className="text-lg font-bold text-slate-900 leading-none">4.</span>
             <div className="space-y-4 flex-grow">
@@ -147,7 +147,7 @@ export default function PrivacyPage() {
                 <p>
                   If you have any questions about this Privacy Policy or our privacy practices, please contact us:
                 </p>
-                <p className="font-mono text-slate-900 bg-slate-100/50 p-4 rounded-xl border border-slate-200/40 inline-block">
+                <p className="font-mono text-slate-900 bg-slate-100/50 p-4 rounded-xl border border-slate-300 inline-block">
                   Email: privacy@luminar.io
                 </p>
               </div>

@@ -17,34 +17,37 @@ export default function ProofStep({
 }: ProofStepProps) {
   const statusStyles = {
     pending: {
-      circle: "bg-slate-800 border-slate-700 text-slate-500",
-      title: "text-slate-500",
-      description: "text-slate-600",
+      container: "bg-white/40 border border-slate-200 opacity-60",
+      circle: "bg-slate-100 border-slate-200 text-slate-400",
+      title: "text-slate-400 font-medium",
+      description: "text-slate-400",
     },
     current: {
-      circle: "bg-luminar/10 border-luminar text-luminar ring-4 ring-luminar/20",
-      title: "text-white font-semibold",
-      description: "text-slate-300",
+      container: "bg-white border-2 border-luminar shadow-[0_8px_30px_rgba(46,163,122,0.12)] scale-[1.01]",
+      circle: "bg-luminar border-luminar text-white font-bold ring-4 ring-luminar/20",
+      title: "text-slate-900 font-bold",
+      description: "text-slate-600",
     },
     completed: {
-      circle: "bg-luminar border-luminar text-black font-bold",
-      title: "text-slate-300",
-      description: "text-slate-400",
+      container: "bg-white/80 border border-slate-300 shadow-sm",
+      circle: "bg-emerald-500 border-emerald-500 text-white font-bold",
+      title: "text-slate-800 font-semibold",
+      description: "text-slate-500",
     },
   };
 
   const currentStyles = statusStyles[status];
 
   return (
-    <div className="flex items-start space-x-4 p-4 border border-slate-800/50 rounded-xl bg-slate-900/30">
+    <div className={`flex items-start space-x-4 p-5 rounded-2xl transition-all duration-300 ${currentStyles.container}`}>
       <div
-        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium transition-all duration-300 ${currentStyles.circle}`}
+        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium transition-all duration-300 shrink-0 ${currentStyles.circle}`}
       >
         {status === "completed" ? "✓" : stepNumber}
       </div>
       <div>
-        <h4 className={`text-base font-medium ${currentStyles.title}`}>{title}</h4>
-        <p className={`text-sm mt-1 ${currentStyles.description}`}>{description}</p>
+        <h4 className={`text-base font-cabinet transition-all duration-300 ${currentStyles.title}`}>{title}</h4>
+        <p className={`text-sm mt-1 font-cabinet transition-all duration-300 ${currentStyles.description}`}>{description}</p>
       </div>
     </div>
   );

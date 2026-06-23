@@ -3,7 +3,7 @@
 @config "../tailwind.config.ts";
 
 @theme {
-  --color-luminar: #7F77DD;
+  --color-luminar: #2EA37A;
   --font-cabinet: var(--font-cabinet);
   --font-zodiak: var(--font-zodiak);
 }

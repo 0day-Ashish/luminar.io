@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import ProofStep from "../../components/ProofStep";
 import KYCForm from "../../components/KYCForm";
 import CredentialCard from "../../components/CredentialCard";
@@ -29,12 +30,20 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-      <div className="mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-cabinet">KYC Verification Flow</h1>
-        <p className="text-slate-550 text-sm mt-1.5 font-cabinet">
-          Complete the verification steps below to generate your private identity credential.
-        </p>
+    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16 w-full">
+      <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-cabinet">KYC Verification Flow</h1>
+          <p className="text-slate-550 text-sm mt-1.5 font-cabinet">
+            Complete the verification steps below to generate your private identity credential.
+          </p>
+        </div>
+        <Link
+          href="/"
+          className="px-5 py-2.5 border border-slate-300 hover:border-slate-400 text-sm font-bold text-slate-650 hover:text-black rounded-full transition duration-200 shadow-sm inline-flex items-center gap-1.5 bg-white/80 self-start sm:self-auto font-cabinet"
+        >
+          ← Back to Home
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -83,13 +92,13 @@ export default function VerifyPage() {
         </div>
 
         {/* Dynamic Action Pane */}
-        <div className="lg:col-span-8 bg-slate-50 border border-slate-200 rounded-3xl p-6 md:p-10 min-h-[420px] flex flex-col justify-center items-center relative overflow-hidden shadow-sm">
+        <div className="lg:col-span-8 bg-slate-50 border border-slate-300 rounded-3xl p-6 md:p-10 min-h-[420px] flex flex-col justify-center items-center relative overflow-hidden shadow-sm">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-luminar/5 rounded-full filter blur-3xl pointer-events-none"></div>
 
           {currentStep === "connect" && (
             <div className="text-center space-y-6 max-w-md">
-              <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800 mx-auto text-2xl">
+              <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-800 mx-auto text-2xl">
                 🔌
               </div>
               <div className="space-y-2">
@@ -124,7 +133,7 @@ export default function VerifyPage() {
 
           {currentStep === "proof" && (
             <div className="text-center space-y-6 max-w-md">
-              <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800 mx-auto text-2xl animate-pulse">
+              <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-800 mx-auto text-2xl animate-pulse">
                 🔐
               </div>
               <div className="space-y-2">
@@ -160,7 +169,7 @@ export default function VerifyPage() {
 
               <button
                 onClick={handleReset}
-                className="mt-4 px-5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-full shadow-sm transition duration-200"
+                className="mt-4 px-5 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-full shadow-sm transition duration-200"
               >
                 Reset Demo Flow
               </button>
