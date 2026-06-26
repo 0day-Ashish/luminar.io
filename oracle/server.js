@@ -3,7 +3,8 @@ const cors = require("cors");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const admin = require("firebase-admin");
+const { initializeApp, cert } = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 
 let db = null;
 let useLocalDb = false;
@@ -53,15 +54,15 @@ try {
   }
 
   if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
     // Use the custom database ID "support" just like frontend
     try {
-      db = admin.firestore("support");
+      db = getFirestore("support");
       console.log("Oracle: Firebase Admin successfully initialized using 'support' database.");
     } catch (e) {
-      db = admin.firestore();
+      db = getFirestore();
       console.log("Oracle: Firebase Admin successfully initialized using default database.");
     }
   } else {
