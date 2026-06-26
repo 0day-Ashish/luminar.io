@@ -13,9 +13,15 @@ if (!getApps().length) {
       initializeApp({
         credential: cert(serviceAccount),
       });
-      console.log("Firebase Admin successfully initialized.");
+      console.log("Firebase Admin successfully initialized from local file.");
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+      console.log("Firebase Admin successfully initialized from environment variable.");
     } else {
-      console.error(`Firebase service account file not found at: ${serviceAccountPath}`);
+      console.error(`Firebase service account file not found, and FIREBASE_SERVICE_ACCOUNT env is missing.`);
     }
   } catch (error) {
     console.error("Firebase Admin initialization error:", error);
