@@ -256,7 +256,7 @@ export default function VerifyPage() {
           {currentStep === "connect" && (
             <div className="text-center space-y-6 max-w-md relative z-10">
               <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-300 flex items-center justify-center text-slate-800 mx-auto text-2xl">
-                🔌
+                🔑
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-bold tracking-tight text-slate-900 font-instrument">Connect Your Wallet</h3>

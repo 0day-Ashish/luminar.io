@@ -63,7 +63,7 @@ export default function Footer() {
               </svg>
             </a>
             <a 
-              href="https://x.com" 
+              href="https://x.com/luminar_IND" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="w-9 h-9 bg-white rounded-lg border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition shadow-sm"

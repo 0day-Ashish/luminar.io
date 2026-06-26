@@ -11,17 +11,41 @@ export default function Home() {
   const [stepProgress, setStepProgress] = useState(0);
   const [activeDebugTab, setActiveDebugTab] = useState("timeline");
   
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHoveringQuote, setIsHoveringQuote] = useState(false);
-  const testimonialRef = useRef<HTMLDivElement>(null);
+  const [demoEmail, setDemoEmail] = useState("");
+  const [demoSubmitting, setDemoSubmitting] = useState(false);
+  const [demoSuccess, setDemoSuccess] = useState(false);
 
-  const handleMouseMoveQuote = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!testimonialRef.current) return;
-    const rect = testimonialRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setMousePos({ x, y });
+  const handleDemoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!demoEmail) return;
+
+    setDemoSubmitting(true);
+    try {
+      const response = await fetch("/api/demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: demoEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setDemoSuccess(true);
+        setDemoEmail("");
+      } else {
+        alert(data.error || "Failed to submit demo request. Please try again.");
+      }
+    } catch (error) {
+      console.error("Demo submission error:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    } finally {
+      setDemoSubmitting(false);
+    }
   };
+  
+
 
   const complianceSteps = [
     {
@@ -372,15 +396,9 @@ export default function Home() {
       {/* Testimonial Section */}
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto border-t border-b border-slate-300 py-20 md:py-28">
-          <div 
-            ref={testimonialRef}
-            onMouseMove={handleMouseMoveQuote}
-            onMouseEnter={() => setIsHoveringQuote(true)}
-            onMouseLeave={() => setIsHoveringQuote(false)}
-            className="max-w-4xl mx-auto flex flex-col items-center text-center relative group select-none"
-          >
-            {/* Logo Icon and Badge Row */}
-            <div className="flex items-center gap-3 mb-8">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center relative group select-none">
+            {/* Logo Icon Row */}
+            <div className="mb-8">
               <div className="relative w-14 h-14 bg-white border border-slate-350 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300 overflow-hidden">
                 <img 
                   src="/assets/dikeLogo.png" 
@@ -388,33 +406,7 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* AGENT Badge Placeholder (for structure/layout spacing) */}
-              <span className="opacity-0 bg-[#1B5E45] text-white text-[9px] font-bold tracking-wider px-2.5 py-1 rounded-md uppercase leading-none select-none">
-                AGENT
-              </span>
             </div>
-
-            {/* Real Interactive AGENT Badge (Follows cursor smoothly or returns home) */}
-            <span 
-              className="absolute bg-[#1B5E45] text-white text-[9.5px] font-bold tracking-wider px-2.5 py-1.5 rounded-md uppercase leading-none select-none pointer-events-none z-20 shadow-sm"
-              style={
-                isHoveringQuote 
-                  ? { 
-                      left: 0,
-                      top: 0,
-                      transform: `translate3d(${mousePos.x + 18}px, ${mousePos.y + 18}px, 0)`,
-                      transition: "transform 0.28s cubic-bezier(0.25, 1, 0.5, 1)"
-                    }
-                  : { 
-                      left: "50%",
-                      top: "28px",
-                      transform: "translate3d(40px, -6px, 0)", 
-                      transition: "left 0.45s cubic-bezier(0.25, 1, 0.5, 1), top 0.45s cubic-bezier(0.25, 1, 0.5, 1), transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)"
-                    }
-              }
-            >
-              AGENT
-            </span>
 
             {/* Testimonial Quote */}
             <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-instrument max-w-3xl mb-8">
@@ -447,75 +439,182 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
             <div className="bg-[#F5F5F3] p-5 rounded-2xl flex flex-col gap-4 hover:shadow-md transition-all duration-300 group border border-slate-200/50">
-              <div className="w-full bg-[#EAEAE7] rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
-                <div className="absolute inset-0 bg-gradient-to-tr from-zinc-850 to-zinc-700 flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
-                  {/* Shield graphic */}
-                  <div className="relative w-28 h-28 bg-[#121315]/80 backdrop-blur-md rounded-2xl border border-zinc-700 shadow-2xl flex items-center justify-center">
-                    <svg className="w-14 h-14 text-[#2EA37A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <div className="absolute bottom-2 bg-[#2EA37A]/10 border border-[#2EA37A]/30 text-[#2EA37A] text-[7px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase leading-none">
-                      WASM Prover
+              <div className="w-full bg-[#2EA37A]/10 rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2EA37A] via-[#248B67] to-[#175A43] flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
+                  {/* Decorative ambient glowing circles */}
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full filter blur-xl pointer-events-none"></div>
+                  <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-[#06241a]/30 rounded-full filter blur-xl pointer-events-none"></div>
+
+                  {/* ZK Prover Glass Card */}
+                  <div className="relative w-44 h-28 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl p-3 flex flex-col justify-between overflow-hidden text-white">
+                    {/* Grid Background overlay for tech feel */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
+                    
+                    {/* Card Header */}
+                    <div className="flex justify-between items-center relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span className="text-[9px] font-mono tracking-wider font-bold text-white/90">WASM_PROVER</span>
+                      </div>
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      </span>
+                    </div>
+
+                    {/* Progress Bar & Coding Representation */}
+                    <div className="space-y-1 relative z-10">
+                      <div className="flex justify-between text-[7px] font-mono text-white/60">
+                        <span>GENERATING_PROOF...</span>
+                        <span>74%</span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 w-[74%] rounded-full"></div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="flex justify-between items-center text-[7px] font-mono text-white/50 border-t border-white/10 pt-1.5 relative z-10">
+                      <span>KEY: 0x7E3A...9D4F</span>
+                      <span className="text-emerald-300 font-bold bg-white/15 px-1 rounded">LOCAL_ONLY</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="text-left mt-2">
                 <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-instrument">
-                  Client-side ZK proof shields
+                  Client-Side ZK Prover
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-clash">
-                  Generate cryptographic proofs of age and document validation directly in your browser. Sensitive identity documents never leave your local device.
+                  Run zero-knowledge proofs directly in the user's browser. Generate cryptographic validation for age, residency, or credentials without uploading sensitive documents.
                 </p>
               </div>
             </div>
 
             {/* Card 2 */}
             <div className="bg-[#F5F5F3] p-5 rounded-2xl flex flex-col gap-4 hover:shadow-md transition-all duration-300 group border border-slate-200/50">
-              <div className="w-full bg-[#EAEAE7] rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
-                <div className="absolute inset-0 bg-gradient-to-tr from-zinc-850 to-zinc-700 flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
-                  {/* Key lock graphic */}
-                  <div className="relative w-28 h-28 bg-[#121315]/80 backdrop-blur-md rounded-2xl border border-zinc-700 shadow-2xl flex items-center justify-center">
-                    <svg className="w-14 h-14 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <div className="absolute bottom-2 bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[7px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase leading-none">
-                      Oracle Verified
+              <div className="w-full bg-[#2EA37A]/10 rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2EA37A] via-[#248B67] to-[#175A43] flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
+                  {/* Decorative ambient glowing circles */}
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full filter blur-xl pointer-events-none"></div>
+                  <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-[#06241a]/30 rounded-full filter blur-xl pointer-events-none"></div>
+
+                  {/* Oracle Verified Glass Card */}
+                  <div className="relative w-44 h-28 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl p-3 flex flex-col justify-between overflow-hidden text-white">
+                    {/* Grid Background */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
+
+                    {/* Card Header */}
+                    <div className="flex justify-between items-center relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <span className="text-[9px] font-mono tracking-wider font-bold text-white/90">ORACLE_SIGN</span>
+                      </div>
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                      </span>
+                    </div>
+
+                    {/* Attestation Flow Visualization */}
+                    <div className="flex items-center justify-between gap-1 py-1 relative z-10">
+                      <div className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-center">
+                        <div className="text-[5px] text-white/40 font-mono leading-none">DATABASE</div>
+                        <div className="text-[7px] font-bold text-white font-mono mt-0.5 leading-none">ID_REF</div>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-amber-300 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <div className="text-[5px] text-amber-300/80 font-mono font-bold tracking-tight mt-0.5">SIGNED</div>
+                      </div>
+                      <div className="bg-amber-500/20 border border-amber-400/30 rounded px-1.5 py-0.5 text-center">
+                        <div className="text-[5px] text-amber-300/60 font-mono leading-none">ATTESTATION</div>
+                        <div className="text-[7px] font-bold text-amber-300 font-mono mt-0.5 leading-none">0xBE2A</div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="flex justify-between items-center text-[7px] font-mono text-white/50 border-t border-white/10 pt-1.5 relative z-10">
+                      <span>SECURE CHANNEL</span>
+                      <span className="text-amber-300 font-bold bg-white/15 px-1 rounded">VERIFIED</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="text-left mt-2">
                 <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-instrument">
-                  Secured oracle attestations
+                  Oracle-Signed Attestations
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-clash">
-                  Format verification keys and third-party database records are hashed and signed by our trusted oracle, creating a clean cryptographic verification chain.
+                  Secure third-party API data verification. Our trusted oracle hashes and cryptographically signs document formats, bridging legacy systems to web3 securely.
                 </p>
               </div>
             </div>
 
             {/* Card 3 */}
             <div className="bg-[#F5F5F3] p-5 rounded-2xl flex flex-col gap-4 hover:shadow-md transition-all duration-300 group border border-slate-200/50">
-              <div className="w-full bg-[#EAEAE7] rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
-                <div className="absolute inset-0 bg-gradient-to-tr from-zinc-850 to-zinc-700 flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
-                  {/* Database/anti-sybil graphic */}
-                  <div className="relative w-28 h-28 bg-[#121315]/80 backdrop-blur-md rounded-2xl border border-zinc-700 shadow-2xl flex items-center justify-center">
-                    <svg className="w-14 h-14 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <div className="absolute bottom-2 bg-blue-500/10 border border-blue-500/30 text-blue-500 text-[7px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase leading-none">
-                      Anti-Sybil Shield
+              <div className="w-full bg-[#2EA37A]/10 rounded-xl h-48 overflow-hidden flex items-center justify-center relative select-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2EA37A] via-[#248B67] to-[#175A43] flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
+                  {/* Decorative ambient glowing circles */}
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full filter blur-xl pointer-events-none"></div>
+                  <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-[#06241a]/30 rounded-full filter blur-xl pointer-events-none"></div>
+
+                  {/* Anti-Sybil Shield Glass Card */}
+                  <div className="relative w-44 h-28 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl p-3 flex flex-col justify-between overflow-hidden text-white">
+                    {/* Grid Background */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
+
+                    {/* Card Header */}
+                    <div className="flex justify-between items-center relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <span className="text-[9px] font-mono tracking-wider font-bold text-white/90">SYBIL_SHIELD</span>
+                      </div>
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-sky-500"></span>
+                      </span>
+                    </div>
+
+                    {/* Unique Identifier Mapping */}
+                    <div className="flex items-center justify-between gap-1 py-1 relative z-10">
+                      <div className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-center">
+                        <div className="text-[5px] text-white/40 font-mono leading-none">PHYS_ID</div>
+                        <div className="text-[7px] font-bold text-white font-mono mt-0.5 leading-none">UNIQUE</div>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="text-[5px] text-sky-300 font-mono font-bold leading-none">NULLIFY</div>
+                        <div className="w-full h-0.5 bg-sky-300/40 relative mt-1">
+                          <div className="absolute top-1/2 left-0 w-1.5 h-1.5 -translate-y-1/2 rounded-full bg-sky-300 animate-ping"></div>
+                        </div>
+                      </div>
+                      <div className="bg-sky-500/20 border border-sky-400/30 rounded px-1.5 py-0.5 text-center">
+                        <div className="text-[5px] text-sky-300/60 font-mono leading-none">STELLAR_ACC</div>
+                        <div className="text-[7px] font-bold text-sky-300 font-mono mt-0.5 leading-none">APPROVED</div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="flex justify-between items-center text-[7px] font-mono text-white/50 border-t border-white/10 pt-1.5 relative z-10">
+                      <span>ANONYMOUS MAPPING</span>
+                      <span className="text-sky-300 font-bold bg-white/15 px-1 rounded">SECURE</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="text-left mt-2">
                 <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-instrument">
-                  Anti-Sybil nullifier tracking
+                  Sybil-Resistant Nullifiers
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-clash">
-                  Unique cryptographic nullifier keys ensure that a single physical document cannot register multiple Stellar accounts, providing complete on-chain Sybil protection.
+                  Ensure strict one-to-one identity mapping. Unique cryptographic nullifiers prevent double-registration on the Stellar ledger while preserving total user anonymity.
                 </p>
               </div>
             </div>
@@ -893,25 +992,15 @@ export default function Home() {
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-            {/* Logo Icon and Badge Row */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="relative w-14 h-14 bg-[#0091FF] rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300">
-                {/* Lowercase "go" text logo */}
-                <span className="text-white text-xl font-bold font-clash tracking-tight select-none">
-                  go
-                </span>
-                {/* Overlapping Hexagon Badge on Top Right */}
-                <div
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-[#1B5E45] shadow-sm flex items-center justify-center"
-                  style={{
-                    clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
-                  }}
+            {/* Logo Icon Row */}
+            <div className="mb-8">
+              <div className="relative w-14 h-14 bg-white rounded-2xl flex items-center justify-center hover:scale-105 transition-transform duration-300 overflow-hidden">
+                <img 
+                  src="/assets/risein.avif" 
+                  alt="Rise In Logo" 
+                  className="w-full h-full object-cover"
                 />
               </div>
-              {/* AGENT Badge */}
-              <span className="bg-[#1B5E45] text-white text-[9px] font-bold tracking-wider px-2.5 py-1 rounded-md uppercase leading-none select-none">
-                AGENT
-              </span>
             </div>
 
             {/* Testimonial Quote */}
@@ -921,8 +1010,8 @@ export default function Home() {
 
             {/* User/Company Attribution */}
             <cite className="not-italic flex flex-col items-center">
-              <span className="text-sm font-bold text-slate-900 font-clash">Josh Silverstein</span>
-              <span className="text-xs text-slate-500 font-clash mt-1">Principal QA Engineer, Gopuff</span>
+              <span className="text-sm font-bold text-slate-900 font-clash">Debanjann</span>
+              <span className="text-xs text-slate-500 font-clash mt-1">DevRel, RiseIn Commnity</span>
             </cite>
           </div>
         </div>
@@ -953,18 +1042,21 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Right Column: Image Placeholder */}
+            {/* Right Column: Team Image */}
             <div className="md:w-1/2 w-full flex justify-center items-center shrink-0">
-              <div className="w-full relative h-[320px] rounded-2xl overflow-hidden shadow-md group select-none">
-                {/* Background Gradient simulating the dinner photo */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-stone-400 to-stone-300 flex items-center justify-center p-8 transition-transform duration-500 group-hover:scale-[1.02]">
-                  {/* Luminar hex logo overlay in white */}
-                  <svg viewBox="0 0 100 100" className="w-16 h-16 text-white/90 drop-shadow-md" fill="currentColor">
-                    {/* Left bracket */}
-                    <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
-                    {/* Right bracket */}
-                    <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
-                  </svg>
+              <div className="w-full relative h-[320px] rounded-2xl overflow-hidden shadow-md group select-none flex items-center justify-center">
+                <img
+                  src="/assets/team.JPG"
+                  alt="Luminar Team"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+                {/* Logo overlay on top in the center */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <img
+                    src="/assets/logo.png"
+                    alt="Luminar Logo"
+                    className="w-86 h-86 object-contain drop-shadow-lg opacity-90 transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
               </div>
             </div>
@@ -977,8 +1069,8 @@ export default function Home() {
       <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto border-b border-slate-300 py-20 md:py-28">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-            {/* Logo Icon and Badge Row */}
-            <div className="flex items-center gap-3 mb-8">
+            {/* Logo Icon Row */}
+            <div className="mb-8">
               <div className="relative w-14 h-14 bg-white border border-slate-300 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300">
                 {/* Clove leaf SVG */}
                 <svg viewBox="0 0 100 100" className="w-7 h-7 text-slate-900" fill="currentColor">
@@ -991,18 +1083,7 @@ export default function Home() {
                   {/* Right leaflet */}
                   <path d="M54,70 C66,66 74,52 66,42 C60,48 55,60 54,70 Z" />
                 </svg>
-                {/* Overlapping Hexagon Badge on Top Right */}
-                <div
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-[#1B5E45] shadow-sm flex items-center justify-center"
-                  style={{
-                    clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
-                  }}
-                />
               </div>
-              {/* AGENT Badge */}
-              <span className="bg-[#1B5E45] text-white text-[9px] font-bold tracking-wider px-2.5 py-1 rounded-md uppercase leading-none select-none">
-                AGENT
-              </span>
             </div>
 
             {/* Testimonial Quote */}
@@ -1041,18 +1122,30 @@ export default function Home() {
 
               {/* Email Input Bar */}
               <div className="max-w-md w-full">
-                <div className="flex items-center bg-white rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
-                  <input
-                    type="email"
-                    placeholder="Your work email"
-                    className="flex-grow bg-transparent px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none font-clash"
-                  />
-                  <button
-                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0 font-clash"
-                  >
-                    Book a demo
-                  </button>
-                </div>
+                {demoSuccess ? (
+                  <div className="bg-white/20 border border-white/35 backdrop-blur-md rounded-full px-6 py-4 text-left font-clash text-sm text-slate-900 font-bold flex items-center gap-2">
+                    <span className="text-emerald-800 text-lg">✓</span>
+                    <span>Demo request received! We will reach out shortly.</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleDemoSubmit} className="flex items-center bg-white rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Your work email"
+                      value={demoEmail}
+                      onChange={(e) => setDemoEmail(e.target.value)}
+                      className="flex-grow bg-transparent px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none font-clash"
+                    />
+                    <button
+                      type="submit"
+                      disabled={demoSubmitting}
+                      className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-500 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0 font-clash cursor-pointer"
+                    >
+                      {demoSubmitting ? "Submitting..." : "Book a demo"}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
 
