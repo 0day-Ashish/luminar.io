@@ -1,12 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import {
-  isConnected,
-  requestAccess,
-  getAddress,
-  isAllowed,
-} from "@stellar/freighter-api";
+import { StellarWalletsKit } from "../lib/wallet";
 
 interface WalletContextType {
   walletAddress: string | null;
@@ -24,31 +19,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const connectWallet = async () => {
     setIsConnecting(true);
     try {
-      // 1. Check if Freighter extension is installed
-      const connectedRes = await isConnected();
-      if (!connectedRes.isConnected) {
-        alert(
-          "Freighter wallet is not installed or not active. Please install it from https://freighter.app"
-        );
-        return;
-      }
-
-      // 2. Request access — this triggers the Freighter popup for user approval
-      const accessRes = await requestAccess();
-      if (accessRes.error) {
-        console.error("Freighter access denied:", accessRes.error);
-        alert("Wallet connection was denied. Please approve the request in Freighter.");
-        return;
-      }
-
-      if (accessRes.address) {
+      const { address } = await StellarWalletsKit.authModal();
+      if (address) {
+        const walletId = StellarWalletsKit.selectedModule?.productId;
         if (typeof window !== "undefined") {
           localStorage.removeItem("walletDisconnected");
+          if (walletId) {
+            localStorage.setItem("selectedWalletId", walletId);
+          }
         }
-        setWalletAddress(accessRes.address);
+        setWalletAddress(address);
       }
     } catch (error) {
-      console.error("Error connecting Freighter wallet:", error);
+      console.error("Error connecting via wallet kit:", error);
     } finally {
       setIsConnecting(false);
     }
@@ -57,11 +40,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const disconnectWallet = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("walletDisconnected", "true");
+      localStorage.removeItem("selectedWalletId");
     }
+    StellarWalletsKit.disconnect().catch(console.error);
     setWalletAddress(null);
   };
 
-  // Auto-connect if site was previously authorized
+  // Auto-connect if a wallet was previously connected
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -69,19 +54,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const connectedRes = await isConnected();
-        if (!connectedRes.isConnected) return;
+        const savedWalletId = typeof window !== "undefined" ? localStorage.getItem("selectedWalletId") : null;
+        if (!savedWalletId) return;
 
-        // Only auto-connect if the user previously allowed this site
-        const allowedRes = await isAllowed();
-        if (!allowedRes.isAllowed) return;
-
-        const addrRes = await getAddress();
-        if (addrRes.address) {
-          setWalletAddress(addrRes.address);
+        StellarWalletsKit.setWallet(savedWalletId);
+        const { address } = await StellarWalletsKit.getAddress();
+        if (address) {
+          setWalletAddress(address);
         }
       } catch (e) {
-        console.warn("Freighter auto-connect check failed", e);
+        console.warn("Wallet auto-connect check failed", e);
       }
     };
     checkConnection();

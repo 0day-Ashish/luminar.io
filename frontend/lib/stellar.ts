@@ -10,7 +10,7 @@ import {
   xdr,
   Transaction
 } from "@stellar/stellar-sdk";
-import { signTransaction } from "@stellar/freighter-api";
+import { StellarWalletsKit } from "./wallet";
 
 const TESTNET_RPC_URL = "https://soroban-testnet.stellar.org";
 const TESTNET_PASSPHRASE = Networks.TESTNET;
@@ -132,17 +132,20 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   // Assemble transaction with simulation results
   const assembledTx = rpc.assembleTransaction(tx, sim).build();
 
-  // 4. Request signing from Freighter wallet
+  // 4. Request signing from the selected wallet via the kit
   const sourceXdr = assembledTx.toXDR();
-  const signResult = await signTransaction(sourceXdr, {
-    networkPassphrase: TESTNET_PASSPHRASE
-  });
-
-  if (signResult.error) {
-    throw new Error(`Freighter signing error: ${signResult.error.message}`);
+  let signedTxXdr: string;
+  try {
+    const res = await StellarWalletsKit.signTransaction(sourceXdr, {
+      networkPassphrase: TESTNET_PASSPHRASE,
+      address: params.userAddress
+    });
+    signedTxXdr = res.signedTxXdr;
+  } catch (err: any) {
+    throw new Error(`Wallet signing error: ${err.message || err}`);
   }
 
-  const signedTx = new Transaction(signResult.signedTxXdr, TESTNET_PASSPHRASE);
+  const signedTx = new Transaction(signedTxXdr, TESTNET_PASSPHRASE);
 
   // 5. Submit transaction to RPC
   const submitRes = await server.sendTransaction(signedTx);
