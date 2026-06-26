@@ -175,15 +175,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mockup Showcase Section - Cream Card Container */}
-        <div className="w-full bg-[#F4F3EF] border border-slate-300 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden shadow-sm relative">
-          {/* SECURE CHECKING indicator mirroring the Luminar phone screenshot badge */}
-          <div className="absolute top-6 right-6 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>Checking compliant credentials</span>
-          </div>
+        {/* Mockup Showcase Section - Glass Card Container */}
+        <div className="w-full bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl p-6 sm:p-8 lg:p-16 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 overflow-hidden shadow-lg shadow-black/[0.01] relative">
 
-          <div className="space-y-4 max-w-md text-left">
+          <div className="space-y-4 max-w-md text-center lg:text-left">
             <span className="text-xs font-bold text-luminar uppercase tracking-wider">
               Zero-Knowledge Engine
             </span>
@@ -196,13 +191,13 @@ export default function Home() {
           </div>
 
           {/* Glowing Mockup Card Placement */}
-          <div className="w-full md:w-auto flex justify-center items-center shrink-0">
+          <div className="w-full lg:w-auto flex justify-center items-center shrink-0 mt-6 lg:mt-0">
             <div className="relative group transition duration-300">
               {/* Soft background glow */}
               <div className="absolute -inset-1.5 bg-luminar/15 rounded-2xl filter blur-xl opacity-75 group-hover:opacity-100 transition duration-300"></div>
               
               {/* Premium dark-mode card mockup standing out on light canvas */}
-              <div className="relative transform hover:-translate-y-1 transition duration-500 shadow-2xl">
+              <div className="relative transform hover:-translate-y-1 transition duration-500 shadow-2xl rounded-3xl">
                 <CredentialCard />
               </div>
             </div>

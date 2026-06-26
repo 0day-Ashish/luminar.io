@@ -24,6 +24,7 @@ export default function VerifyPage() {
     dob_timestamp: number;
     oracle_signature: string;
     min_age_secs: number;
+    doc_type?: string;
   } | null>(null);
 
   // ZK computed inputs & proof
@@ -313,9 +314,6 @@ export default function VerifyPage() {
           {/* Step 4: Complete/Credential Issued */}
           {currentStep === "complete" && (
             <div className="text-center space-y-6 max-w-md flex flex-col items-center relative z-10 w-full">
-              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 text-2xl shadow-sm">
-                ✓
-              </div>
               
               <div className="space-y-2">
                 <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">
@@ -329,7 +327,13 @@ export default function VerifyPage() {
               </div>
               
               <div className="pt-2 w-full flex justify-center">
-                <CredentialCard />
+                <CredentialCard
+                  docType={kycData?.doc_type}
+                  isAlreadyVerified={isAlreadyVerified}
+                  commitment={commitment || undefined}
+                  nullifier={nullifier || undefined}
+                  oracleSignature={kycData?.oracle_signature}
+                />
               </div>
 
               {!isAlreadyVerified && (

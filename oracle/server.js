@@ -12,6 +12,7 @@ const BN254_PRIME = BigInt(
 // ---------------------------------------------------------------------------
 const PORT = process.env.PORT || 3001;
 const ORACLE_SECRET_KEY = process.env.ORACLE_SECRET_KEY;
+const SUREPASS_TOKEN = process.env.SUREPASS_TOKEN;
 
 if (!ORACLE_SECRET_KEY) {
   console.error(
@@ -20,6 +21,13 @@ if (!ORACLE_SECRET_KEY) {
       '       export ORACLE_SECRET_KEY="your-secret-key-here"'
   );
   process.exit(1);
+}
+
+if (!SUREPASS_TOKEN) {
+  console.warn(
+    "WARNING: SUREPASS_TOKEN is not set. PAN verification via Surepass will fail.\n" +
+      '         export SUREPASS_TOKEN="your-surepass-token-here"'
+  );
 }
 
 
@@ -34,14 +42,36 @@ function bufferToBigInt(buf) {
 }
 
 /**
- * Validate an Indian identity document number.
- *  - PAN:    5 uppercase letters + 4 digits + 1 uppercase letter  (ABCDE1234F)
- *  - Aadhaar: exactly 12 digits
+ * Validate a document number based on its type.
+ *  - pan:      5 uppercase letters + 4 digits + 1 uppercase letter  (ABCDE1234F)
+ *  - aadhaar:  exactly 12 digits
+ *  - passport: 1 uppercase letter + 7 digits  (Indian passport, e.g. A1234567)
+ *
+ * Returns an object: { valid: boolean, error?: string }
  */
-function isValidIndianId(idNumber) {
-  const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-  const AADHAAR_RE = /^\d{12}$/;
-  return PAN_RE.test(idNumber) || AADHAAR_RE.test(idNumber);
+function isValidDocument(idNumber, docType) {
+  const FORMATS = {
+    pan:      { regex: /^[A-Z]{5}[0-9]{4}[A-Z]$/,  example: "ABCDE1234F" },
+    aadhaar:  { regex: /^\d{12}$/,                   example: "123456789012" },
+    passport: { regex: /^[A-Z]{1}[0-9]{7}$/,         example: "A1234567" },
+  };
+
+  const fmt = FORMATS[docType];
+  if (!fmt) {
+    return {
+      valid: false,
+      error: `Unsupported document type: "${docType}". Accepted: ${Object.keys(FORMATS).join(", ")}.`,
+    };
+  }
+
+  if (!fmt.regex.test(idNumber)) {
+    return {
+      valid: false,
+      error: `Invalid ${docType.toUpperCase()} format. Expected pattern like ${fmt.example}.`,
+    };
+  }
+
+  return { valid: true };
 }
 
 /**
@@ -52,6 +82,33 @@ function parseDobTimestamp(dob) {
   const d = new Date(dob);
   if (isNaN(d.getTime())) return null;
   return Math.floor(d.getTime() / 1000);
+}
+
+/**
+ * Verify a PAN number against the Surepass sandbox API.
+ * Makes a POST request to the PAN comprehensive endpoint.
+ * Returns `true` if the document is valid, `false` otherwise.
+ */
+async function verifyWithSurepass(idNumber) {
+  try {
+    const response = await fetch(
+      "https://sandbox.surepass.io/api/v1/pan/pan-comprehensive",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUREPASS_TOKEN}`,
+        },
+        body: JSON.stringify({ id_number: idNumber }),
+      }
+    );
+
+    const data = await response.json();
+    return data.data?.valid === true;
+  } catch (err) {
+    console.error("Surepass PAN verification error:", err);
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -71,9 +128,9 @@ app.get("/health", (_req, res) => {
 });
 
 // ---- POST /verify ---------------------------------------------------------
-app.post("/verify", (req, res) => {
+app.post("/verify", async (req, res) => {
   try {
-    const { name, dob, id_number, country } = req.body;
+    const { name, dob, id_number, country, doc_type } = req.body;
 
     // ------------------------------------------------------------------
     // 1. Validate required fields
@@ -83,6 +140,7 @@ app.post("/verify", (req, res) => {
     if (!dob) missing.push("dob");
     if (!id_number) missing.push("id_number");
     if (!country) missing.push("country");
+    if (!doc_type) missing.push("doc_type");
 
     if (missing.length > 0) {
       return res.status(400).json({
@@ -91,18 +149,43 @@ app.post("/verify", (req, res) => {
     }
 
     // ------------------------------------------------------------------
-    // 2. Country-specific ID validation
+    // 2. Document format validation (type-aware)
     // ------------------------------------------------------------------
-    const countryLower = country.toLowerCase();
-    if (countryLower === "india" || countryLower === "in") {
-      if (!isValidIndianId(id_number)) {
-        return res.status(400).json({
-          error:
-            "Invalid Indian ID format. " +
-            "Expected PAN (ABCDE1234F) or Aadhaar (12 digits).",
-        });
+    const docTypeLower = doc_type.toLowerCase();
+    const formatCheck = isValidDocument(id_number, docTypeLower);
+    if (!formatCheck.valid) {
+      return res.status(400).json({ error: formatCheck.error });
+    }
+
+    // ------------------------------------------------------------------
+    // 3. Live document verification (where available)
+    // ------------------------------------------------------------------
+    if (docTypeLower === "pan") {
+      // PAN cards are verified against the Surepass sandbox API to
+      // confirm the document actually exists in government records.
+      // If SUREPASS_TOKEN is not configured, fall back to format-only validation.
+      if (SUREPASS_TOKEN) {
+        const panValid = await verifyWithSurepass(id_number);
+        if (!panValid) {
+          return res.status(422).json({
+            error: "PAN verification failed. Document not found or invalid.",
+          });
+        }
+      } else {
+        console.warn("SUREPASS_TOKEN not set — PAN accepted via format validation only.");
       }
     }
+    // Aadhaar: Format validation only.
+    // Live Aadhaar OTP-based verification requires a licensed AUA
+    // (Authentication User Agency) registered with UIDAI. This is
+    // not available in a sandbox environment and needs a production
+    // licence to integrate.
+    //
+    // Passport: Format validation only.
+    // Live passport verification requires integration with an
+    // international identity verification API (e.g. Surepass Passport
+    // OCR, or government MRP/ICAO lookups) which is not yet
+    // configured for this environment.
 
     // ------------------------------------------------------------------
     // 3. Parse date of birth
@@ -139,8 +222,10 @@ app.post("/verify", (req, res) => {
 
     // ------------------------------------------------------------------
     // 7. Sign the payload with HMAC-SHA256
+    //    doc_type is included so the credential is bound to the
+    //    specific document kind that was verified.
     // ------------------------------------------------------------------
-    const signaturePayload = `${nameHashHex}:${idHashHex}:${secretHex}:${dobTimestamp}`;
+    const signaturePayload = `${nameHashHex}:${idHashHex}:${secretHex}:${dobTimestamp}:${docTypeLower}`;
     const oracleSignature = crypto
       .createHmac("sha256", ORACLE_SECRET_KEY)
       .update(signaturePayload)
@@ -154,6 +239,7 @@ app.post("/verify", (req, res) => {
       id_hash: idHashHex,
       secret: secretHex,
       dob_timestamp: dobTimestamp,
+      doc_type: docTypeLower,
       oracle_signature: oracleSignature,
     });
   } catch (err) {

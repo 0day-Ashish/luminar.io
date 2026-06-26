@@ -8,6 +8,7 @@ interface KYCFormProps {
     id_hash: string;
     secret: string;
     dob_timestamp: number;
+    doc_type: string;
     oracle_signature: string;
     min_age_secs: number;
   }) => void;
@@ -18,6 +19,7 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
   const [dob, setDob] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [country, setCountry] = useState("India");
+  const [docType, setDocType] = useState("pan");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,7 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
           dob,
           id_number: idNumber,
           country,
+          doc_type: docType,
         }),
       });
 
@@ -57,6 +60,7 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
         id_hash: result.id_hash,
         secret: result.secret,
         dob_timestamp: result.dob_timestamp,
+        doc_type: result.doc_type,
         oracle_signature: result.oracle_signature,
         min_age_secs: MIN_AGE_SECS,
       });
@@ -132,17 +136,46 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Document Number
+              Document Type
             </label>
-            <input
-              type="text"
-              required
-              value={idNumber}
-              onChange={(e) => setIdNumber(e.target.value)}
-              placeholder={country === "India" ? "ABCDE1234F / 12 digits" : "ID Number"}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-luminar focus:ring-1 focus:ring-luminar text-sm font-cabinet"
-            />
+            <select
+              value={docType}
+              onChange={(e) => {
+                setDocType(e.target.value);
+                setIdNumber("");
+              }}
+              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-luminar focus:ring-1 focus:ring-luminar text-sm font-cabinet"
+            >
+              <option value="pan">PAN Card</option>
+              <option value="aadhaar">Aadhaar</option>
+              <option value="passport">Passport</option>
+            </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Document Number
+          </label>
+          <input
+            type="text"
+            required
+            value={idNumber}
+            onChange={(e) => setIdNumber(e.target.value)}
+            placeholder={
+              docType === "pan"
+                ? "ABCDE1234F"
+                : docType === "aadhaar"
+                ? "123456789012"
+                : "A1234567"
+            }
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-luminar focus:ring-1 focus:ring-luminar text-sm font-cabinet"
+          />
+          <p className="text-[10px] text-slate-400 mt-1 font-mono">
+            {docType === "pan" && "Format: 5 letters + 4 digits + 1 letter"}
+            {docType === "aadhaar" && "Format: 12 digits"}
+            {docType === "passport" && "Format: 1 letter + 7 digits"}
+          </p>
         </div>
       </div>
 

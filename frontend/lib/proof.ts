@@ -100,20 +100,16 @@ export async function generateKycProof(
   // 2. Prepare inputs
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const stellarField = stellarAddressToField(stellarAddress);
-  const dobHex = padTo32BytesHex(dobTimestamp.toString(16));
-  const currentTimestampHex = padTo32BytesHex(currentTimestamp.toString(16));
-  const minAgeSecsHex = padTo32BytesHex(minAgeSecs.toString(16));
-
   const inputs = {
     name_hash: padTo32BytesHex(nameHash),
     id_hash: padTo32BytesHex(idHash),
-    dob_timestamp: dobHex,
+    dob_timestamp: dobTimestamp.toString(),
     secret: padTo32BytesHex(secret),
     commitment: padTo32BytesHex(commitment),
     nullifier: padTo32BytesHex(nullifier),
     stellar_address: stellarField,
-    current_timestamp: currentTimestampHex,
-    min_age_secs: minAgeSecsHex
+    current_timestamp: currentTimestamp.toString(),
+    min_age_secs: minAgeSecs.toString()
   };
 
   console.log("Noir Prover Inputs:", inputs);
@@ -125,7 +121,7 @@ export async function generateKycProof(
   try {
     // 4. Generate witness & proof
     const { witness } = await noir.execute(inputs);
-    const proofRes = await backend.generateProof(witness);
+    const proofRes = await backend.generateProof(witness, { keccak: true });
 
     // publicInputs is string[] — convert each hex string field to 32 bytes
     const numInputs = proofRes.publicInputs.length;

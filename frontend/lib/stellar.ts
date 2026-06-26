@@ -34,6 +34,16 @@ export function hexToBytes(hex: string): Uint8Array {
   return bytes;
 }
 
+export function hexToBytes32(hex: string): Uint8Array {
+  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const padded = clean.padStart(64, "0").slice(0, 64);
+  const bytes = new Uint8Array(32);
+  for (let i = 0; i < 64; i += 2) {
+    bytes[i / 2] = parseInt(padded.slice(i, i + 2), 16);
+  }
+  return bytes;
+}
+
 export async function checkIsVerified(userAddress: string): Promise<boolean> {
   const contractId = process.env.NEXT_PUBLIC_REGISTRY_CONTRACT_ID;
   if (!contractId) throw new Error("Registry contract ID not configured");
@@ -82,8 +92,8 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   const userScVal = nativeToScVal(params.userAddress, { type: "address" });
   const proofScVal = nativeToScVal(params.proofBytes, { type: "bytes" });
   const publicInputsScVal = nativeToScVal(params.publicInputsBytes, { type: "bytes" });
-  const commitmentScVal = nativeToScVal(hexToBytes(params.commitmentHex), { type: "bytes" });
-  const nullifierScVal = nativeToScVal(hexToBytes(params.nullifierHex), { type: "bytes" });
+  const commitmentScVal = xdr.ScVal.scvBytes(Buffer.from(hexToBytes32(params.commitmentHex)));
+  const nullifierScVal = xdr.ScVal.scvBytes(Buffer.from(hexToBytes32(params.nullifierHex)));
   const minAgeScVal = nativeToScVal(BigInt(params.minAgeSecs), { type: "u64" });
 
   // 2. Build the transaction structure
@@ -108,6 +118,14 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   // 3. Simulate to calculate fees and resource limits
   const sim = await server.simulateTransaction(tx);
   if (!rpc.Api.isSimulationSuccess(sim)) {
+    console.error("=== SIMULATION FAILURE DEBUG ===");
+    console.error("Full simulation response:", JSON.stringify(sim, null, 2));
+    if ('error' in sim) {
+      console.error("Simulation error field:", (sim as any).error);
+    }
+    if ('events' in sim) {
+      console.error("Diagnostic events:", JSON.stringify((sim as any).events, null, 2));
+    }
     throw new Error(`Simulation failed: ${JSON.stringify(sim)}`);
   }
 
