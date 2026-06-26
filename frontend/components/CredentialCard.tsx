@@ -98,7 +98,7 @@ export default function CredentialCard({
       >
         {/* ==================== FRONT SIDE ==================== */}
         <div
-          className="absolute inset-0 w-full h-full p-6 border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden bg-cover bg-center pointer-events-none"
+          className="absolute inset-0 w-full h-full p-6 border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden bg-cover bg-center"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
