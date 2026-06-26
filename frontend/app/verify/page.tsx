@@ -149,7 +149,13 @@ export default function VerifyPage() {
       setIsAlreadyVerified(true);
     } catch (e: any) {
       console.error("On-chain Registration Error:", e);
-      setError(e.message || "Failed to register on-chain. Please check Freighter and try again.");
+      const errMsg = e.message || "";
+      if (errMsg.includes("Error(Contract, #4)") || errMsg.includes("AlreadyVerified")) {
+        setIsAlreadyVerified(true);
+        setError(null);
+      } else {
+        setError(errMsg || "Failed to register on-chain. Please check Freighter and try again.");
+      }
     } finally {
       setLoading(false);
     }
