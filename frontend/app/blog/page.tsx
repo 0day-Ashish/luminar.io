@@ -67,7 +67,7 @@ export default function BlogPage() {
   const featuredPost = BLOG_POSTS.find((p) => p.featured);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-cabinet">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
       {/* Blog Header */}
       <div className="max-w-3xl mb-16 space-y-4">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">
@@ -75,7 +75,7 @@ export default function BlogPage() {
         </span>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
           Thoughts on privacy, compliance, <br />
-          and <span className="font-zodiak italic">stellar decentralization</span>.
+          and <span className="font-instrument italic">stellar decentralization</span>.
         </h1>
         <p className="text-base text-slate-600 max-w-xl">
           Deep dives into zero-knowledge cryptography, smart contracts, and identity protocols shaping the future of global web3 compliance.
@@ -115,10 +115,10 @@ export default function BlogPage() {
                     {featuredPost.category}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug font-zodiak">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug font-instrument">
                   {featuredPost.title}
                 </h2>
-                <p className="text-sm text-slate-600 leading-relaxed font-cabinet">
+                <p className="text-sm text-slate-600 leading-relaxed font-clash">
                   {featuredPost.description}
                 </p>
               </div>

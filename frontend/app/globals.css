@@ -4,8 +4,10 @@
 
 @theme {
   --color-luminar: #2EA37A;
-  --font-cabinet: var(--font-cabinet);
-  --font-zodiak: var(--font-zodiak);
+  --font-cabinet: var(--font-clash);
+  --font-zodiak: var(--font-instrument);
+  --font-instrument: var(--font-instrument);
+  --font-clash: "Clash Display", sans-serif;
 }
 
 @keyframes scroll-marquee {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import WalletButton from "../components/WalletButton";
@@ -17,6 +17,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
 });
 
@@ -43,9 +48,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cabinetGrotesk.variable} ${zodiak.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${instrumentSans.variable} ${cabinetGrotesk.variable} ${zodiak.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F2F0EF] text-slate-900 selection:bg-luminar/25 selection:text-slate-900 font-cabinet">
+      <head>
+        <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#F2F0EF] text-slate-900 selection:bg-luminar/25 selection:text-slate-900 font-clash">
         <WalletProvider>
           <ReactLenis root>
             {/* Sticky Reveal Wrapper */}
@@ -67,19 +75,19 @@ export default function RootLayout({
                 <nav className="flex items-center space-x-3">
                   <Link
                     href="/verify"
-                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm font-bold text-slate-600 hover:text-black rounded-full transition duration-200"
+                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm text-slate-600 hover:text-black rounded-full transition duration-200"
                   >
                     Verify
                   </Link>
                   <Link
                     href="/blog"
-                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm font-bold text-slate-600 hover:text-black rounded-full transition duration-200"
+                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm text-slate-600 hover:text-black rounded-full transition duration-200"
                   >
                     Blog
                   </Link>
                   <Link
                     href="/contact"
-                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm font-bold text-slate-600 hover:text-black rounded-full transition duration-200"
+                    className="px-4 py-2 border border-slate-300 hover:border-slate-400 text-sm text-slate-600 hover:text-black rounded-full transition duration-200"
                   >
                     Contact
                   </Link>

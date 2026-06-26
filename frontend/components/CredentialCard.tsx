@@ -98,10 +98,11 @@ export default function CredentialCard({
       >
         {/* ==================== FRONT SIDE ==================== */}
         <div
-          className="absolute inset-0 w-full h-full p-6 bg-gradient-to-br from-[#2EA37A] via-[#2ba077] to-[#217c5b] border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden"
+          className="absolute inset-0 w-full h-full p-6 border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden bg-cover bg-center pointer-events-none"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
+            backgroundImage: "url('/assets/credential-card.jpg')",
           }}
         >
           {/* Background Ambient Glows */}
@@ -117,7 +118,7 @@ export default function CredentialCard({
               <span className="text-[10px] text-[#06241a] font-mono tracking-widest uppercase block font-semibold opacity-85">
                 Identity Anchor
               </span>
-              <h2 className="font-zodiak font-extrabold text-xl tracking-wider text-white mt-0.5">
+              <h2 className="font-clash font-extrabold text-xl tracking-wider text-white mt-0.5">
                 LUMINAR
               </h2>
             </div>
@@ -239,11 +240,12 @@ export default function CredentialCard({
 
         {/* ==================== BACK SIDE ==================== */}
         <div
-          className="absolute inset-0 w-full h-full p-5 bg-gradient-to-br from-[#2EA37A] via-[#2ba077] to-[#217c5b] border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden"
+          className="absolute inset-0 w-full h-full p-5 border border-white/10 rounded-3xl flex flex-col justify-between shadow-2xl overflow-hidden bg-cover bg-center"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
+            backgroundImage: "url('/assets/credential-card.jpg')",
           }}
         >
           {/* Ambient Glow */}
@@ -255,7 +257,7 @@ export default function CredentialCard({
               <span className="text-[10px] text-[#06241a] font-mono tracking-widest uppercase block font-semibold opacity-85">
                 Zero-Knowledge Proof
               </span>
-              <h3 className="font-zodiak font-bold text-sm text-white mt-0.5">
+              <h3 className="font-clash font-bold text-sm text-white mt-0.5">
                 Cryptographic Attestation
               </h3>
             </div>

@@ -166,17 +166,17 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16 w-full font-cabinet">
+    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16 w-full font-clash">
       <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-zodiak">KYC Verification Flow</h1>
-          <p className="text-slate-550 text-sm mt-1.5 font-cabinet">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-instrument">KYC Verification Flow</h1>
+          <p className="text-slate-550 text-sm mt-1.5 font-clash">
             Complete the verification steps below to generate your private identity credential.
           </p>
         </div>
         <Link
           href="/"
-          className="px-5 py-2.5 border border-slate-300 hover:border-slate-400 text-sm font-bold text-slate-650 hover:text-black rounded-full transition duration-200 shadow-sm inline-flex items-center gap-1.5 bg-white/80 self-start sm:self-auto font-cabinet"
+          className="px-5 py-2.5 border border-slate-300 hover:border-slate-400 text-sm text-slate-650 hover:text-black rounded-full transition duration-200 shadow-sm inline-flex items-center gap-1.5 bg-white/80 self-start sm:self-auto font-clash"
         >
           ← Back to Home
         </Link>
@@ -259,8 +259,8 @@ export default function VerifyPage() {
                 🔌
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">Connect Your Wallet</h3>
-                <p className="text-slate-550 text-sm font-cabinet leading-relaxed">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-instrument">Connect Your Wallet</h3>
+                <p className="text-slate-550 text-sm font-clash leading-relaxed">
                   We use your Stellar wallet to establish your identity anchor. Click below to connect via Freighter.
                 </p>
               </div>
@@ -288,8 +288,8 @@ export default function VerifyPage() {
                 🔐
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">Generate Compliance Proof</h3>
-                <p className="text-slate-550 text-sm font-cabinet leading-relaxed">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-instrument">Generate Compliance Proof</h3>
+                <p className="text-slate-550 text-sm font-clash leading-relaxed">
                   Your identity has been validated by the oracle. We will now generate a zero-knowledge proof locally on your device to certify you are over 18 years old.
                 </p>
               </div>
@@ -316,10 +316,10 @@ export default function VerifyPage() {
             <div className="text-center space-y-6 max-w-md flex flex-col items-center relative z-10 w-full">
               
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-instrument">
                   {isAlreadyVerified ? "Verification Complete!" : "Compliance Proof Generated!"}
                 </h3>
-                <p className="text-slate-550 text-sm font-cabinet leading-relaxed">
+                <p className="text-slate-550 text-sm font-clash leading-relaxed">
                   {isAlreadyVerified
                     ? "Your compliance credential is active and verified on the Stellar ledger. You are fully compliant."
                     : "Your proof is ready. Register it on-chain to activate your compliance token."}

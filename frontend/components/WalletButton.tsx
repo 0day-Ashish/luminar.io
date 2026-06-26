@@ -53,10 +53,10 @@ export default function WalletButton() {
           >
             {/* Modal Header */}
             <div className="p-6 pb-4">
-              <h3 className="text-lg font-bold text-slate-900 font-zodiak mb-2">
+              <h3 className="text-lg font-bold text-slate-900 font-instrument mb-2">
                 Disconnect Wallet
               </h3>
-              <p className="text-sm text-slate-500 font-cabinet leading-relaxed">
+              <p className="text-sm text-slate-500 font-clash leading-relaxed">
                 Are you sure you want to disconnect? You will need to re-connect your wallet to perform verifiable KYC proofs on Luminar.
               </p>
             </div>

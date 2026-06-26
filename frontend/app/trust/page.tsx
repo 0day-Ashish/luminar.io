@@ -8,14 +8,14 @@ export const metadata = {
 
 export default function TrustPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-cabinet">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24 space-y-6">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">
           Luminar Trust Center
         </span>
-        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1] font-zodiak">
-          Trust built on <span className="font-zodiak italic">mathematics</span>, not promises.
+        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1] font-instrument">
+          Trust built on <span className="font-instrument italic">mathematics</span>, not promises.
         </h1>
         <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
           Luminar is designed from the ground up to ensure your identity remains private, secure, and under your exclusive control. We use zero-knowledge cryptography to prove compliance on Stellar.
@@ -99,7 +99,7 @@ export default function TrustPage() {
 
       {/* How Trust Flow Works section */}
       <div className="bg-[#F4F3EF] border border-slate-300 rounded-3xl p-8 md:p-12 mb-20 md:mb-28 shadow-sm">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-zodiak mb-8 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-instrument mb-8 tracking-tight">
           How compliance verification establishes trust
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 relative">
@@ -143,7 +143,7 @@ export default function TrustPage() {
 
       {/* FAQ Accordion Section */}
       <div className="max-w-3xl mx-auto mb-20 md:mb-28">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-zodiak mb-8 text-center tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-instrument mb-8 text-center tracking-tight">
           Trust & Security FAQs
         </h2>
         <div className="space-y-6">
@@ -186,7 +186,7 @@ export default function TrustPage() {
           <span className="text-[10px] font-mono text-[#2EA37A] font-bold uppercase tracking-wider">
             Open Source Codebase
           </span>
-          <h3 className="text-2xl sm:text-3xl font-bold font-zodiak tracking-tight leading-tight">
+          <h3 className="text-2xl sm:text-3xl font-bold font-instrument tracking-tight leading-tight">
             Verify the cryptographic logic yourself.
           </h3>
           <p className="text-sm text-slate-300 leading-relaxed">

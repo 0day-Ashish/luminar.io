@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-cabinet">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-clash">
       {/* Title & Header */}
       <div className="border-b border-slate-300 pb-10 mb-12">
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 font-zodiak mb-4">
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 font-instrument mb-4">
           Privacy Policy
         </h1>
         <p className="text-sm text-slate-550">

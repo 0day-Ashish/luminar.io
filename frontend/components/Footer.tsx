@@ -46,8 +46,8 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer ref={footerRef} className="sticky bottom-0 z-0 w-full bg-[#F2F0EF] pt-24 pb-16 px-4 sm:px-6 lg:px-12 border-t border-slate-300 overflow-hidden">
-      <div className="max-w-7xl mx-auto flex flex-col">
+    <footer ref={footerRef} className="sticky bottom-0 z-0 w-full pt-24 pb-16 border-t border-black overflow-hidden bg-center" style={{ backgroundImage: "url('/assets/footer.jpg')" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col">
         {/* Top Row: Socials & Links */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8">
           {/* Left: Social Buttons */}
@@ -75,7 +75,7 @@ export default function Footer() {
           </div>
           
           {/* Right: Legal & Trust Links */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold text-black tracking-wider font-cabinet uppercase">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold text-black tracking-wider font-clash uppercase">
             <Link href="/privacy" className="text-slate-600 hover:text-black transition">Privacy</Link>
             <Link href="/terms" className="text-slate-600 hover:text-black transition">Terms</Link>
             <Link href="/explorer" className="text-slate-600 hover:text-black transition">Explorer</Link>
@@ -85,38 +85,38 @@ export default function Footer() {
         </div>
 
         {/* Divider Line */}
-        <div className="w-full h-[1px] bg-slate-300 mb-20" />
+        <div className="w-full h-[1px] bg-black mb-20" />
+      </div>
 
-        {/* Giant Repeating Watermark */}
-        <div className="w-full overflow-hidden select-none pointer-events-none pb-0 opacity-[0.03]">
-          <div 
-            className="flex items-center justify-center gap-12 whitespace-nowrap will-change-transform"
-            style={{ transform: `translateX(${translateX}%)` }}
-          >
-            <span className="text-[14vw] font-black font-zodiak tracking-tighter leading-none text-black">
-              Luminar
-            </span>
-            <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
-              <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
-              <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
-            </svg>
-            <span className="text-[14vw] font-black font-zodiak tracking-tighter leading-none text-black">
-              Luminar
-            </span>
-            <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
-              <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
-              <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
-            </svg>
-            <span className="text-[14vw] font-black font-zodiak tracking-tighter leading-none text-black">
-              Luminar
-            </span>
-          </div>
+      {/* Giant Repeating Watermark (Spans edge-to-edge) */}
+      <div className="w-full overflow-hidden select-none pointer-events-none pb-0">
+        <div 
+          className="flex items-center justify-center gap-12 whitespace-nowrap will-change-transform"
+          style={{ transform: `translateX(${translateX}%)` }}
+        >
+          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+            Luminar
+          </span>
+          <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
+            <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
+            <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
+          </svg>
+          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+            Luminar
+          </span>
+          <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
+            <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
+            <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
+          </svg>
+          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+            Luminar
+          </span>
         </div>
+      </div>
 
-        {/* Small Copyright line */}
-        <div className="text-center text-[10px] text-slate-400 font-mono mt-2">
-          © {new Date().getFullYear()} Luminar.io. Built on Stellar.
-        </div>
+      {/* Small Copyright line */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-center text-[10px] text-black font-mono mt-8">
+        © {new Date().getFullYear()} Luminar.io. Built on Stellar.
       </div>
     </footer>
   );

@@ -42,14 +42,14 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-cabinet">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
       {/* Page Header */}
       <div className="max-w-3xl mb-16 space-y-4">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">
           Contact Us
         </span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight font-zodiak">
-          Get in touch with <span className="font-zodiak italic">Us</span>.
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight font-instrument">
+          Get in touch with <span className="font-instrument italic">Us</span>.
         </h1>
         <p className="text-base text-slate-600 max-w-xl">
           Have questions about zero-knowledge integrations, smart contracts, or auditing compliance requirements on Stellar? We are here to help.
@@ -67,7 +67,7 @@ export default function ContactPage() {
                 </svg>
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-slate-900 font-zodiak">Message Sent!</h3>
+                <h3 className="text-2xl font-bold text-slate-900 font-instrument">Message Sent!</h3>
                 <p className="text-sm text-slate-650 max-w-sm mx-auto leading-relaxed">
                   Thank you for reaching out. A compliance specialist or engineer from our team will respond to your query shortly.
                 </p>
@@ -170,7 +170,7 @@ export default function ContactPage() {
         <div className="lg:col-span-5 space-y-8 lg:pl-6">
           {/* Info Card 1 */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-slate-900 font-zodiak">General Contact</h3>
+            <h3 className="text-xl font-bold text-slate-900 font-instrument">General Contact</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               If you have any quick questions or feedback, feel free to send us an email directly:
             </p>
@@ -192,7 +192,7 @@ export default function ContactPage() {
 
           {/* Info Card 2 */}
           <div className="space-y-4 pt-6 border-t border-slate-300">
-            <h3 className="text-xl font-bold text-slate-900 font-zodiak">Developer Ecosystem</h3>
+            <h3 className="text-xl font-bold text-slate-900 font-instrument">Developer Ecosystem</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               We build open-source identity tooling for the Stellar ledger. Check out our repositories, open issues, or contribute to our SDKs:
             </p>

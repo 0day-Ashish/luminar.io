@@ -14,6 +14,8 @@ const config: Config = {
       fontFamily: {
         cabinet: ["var(--font-cabinet)", "sans-serif"],
         zodiak: ["var(--font-zodiak)", "serif"],
+        instrument: ["var(--font-instrument)", "sans-serif"],
+        clash: ["var(--font-clash)", "sans-serif"],
       },
     },
   },

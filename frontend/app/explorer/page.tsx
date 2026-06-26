@@ -12,10 +12,10 @@ interface MetricCardProps {
 function MetricCard({ label, value, subtext }: MetricCardProps) {
   return (
     <div className="bg-white/40 backdrop-blur-xl border border-white/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 font-cabinet">
+      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 font-clash">
         {label}
       </p>
-      <p className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight font-zodiak mb-1">
+      <p className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight font-instrument mb-1">
         {value}
       </p>
       <p className="text-xs text-slate-400 font-mono">
@@ -131,14 +131,14 @@ export default function Explorer() {
   }, []);
 
   return (
-    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 w-full font-cabinet">
+    <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 w-full font-clash">
       {/* Header section */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
             ZK-COMPLIANT NETWORK
           </span>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1] font-zodiak mt-1">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1] font-instrument mt-1">
             Privacy Ledger Explorer
           </h2>
           <p className="text-sm text-slate-500 mt-2 max-w-xl">
@@ -170,7 +170,7 @@ export default function Explorer() {
         {/* Left 2 Columns: Live Event Stream */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl p-6 sm:p-8 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900 font-zodiak mb-6 border-b border-slate-200/50 pb-4">
+            <h3 className="text-xl font-bold text-slate-900 font-instrument mb-6 border-b border-slate-200/50 pb-4">
               Real-Time Verification Stream
             </h3>
 
@@ -226,7 +226,7 @@ export default function Explorer() {
         <div className="space-y-6">
           {/* Document Distribution Card */}
           <div className="bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-900 font-zodiak mb-6">
+            <h3 className="text-xl font-bold text-slate-900 font-instrument mb-6">
               Document Distribution
             </h3>
             
@@ -278,8 +278,8 @@ export default function Explorer() {
                 </svg>
                 {/* Center Text label inside Donut */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold font-zodiak text-slate-800 leading-none">58%</span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-cabinet mt-0.5">PAN Card</span>
+                  <span className="text-lg font-bold font-instrument text-slate-800 leading-none">58%</span>
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-clash mt-0.5">PAN Card</span>
                 </div>
               </div>
 
@@ -289,7 +289,7 @@ export default function Explorer() {
                   <div key={type.name} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2.5">
                       <span className={`w-3 h-3 rounded-full ${type.color} shrink-0 shadow-sm`} />
-                      <span className="font-bold text-slate-700 font-cabinet">{type.name}</span>
+                      <span className="font-bold text-slate-700 font-clash">{type.name}</span>
                     </div>
                     <span className="font-mono font-bold text-slate-650 bg-slate-100 px-1.5 py-0.5 rounded">
                       {type.percentage}%
