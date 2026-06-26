@@ -75,9 +75,9 @@ export default function BlogPage() {
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">
           Luminar Journal
         </span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+        <h1 className="text-4xl sm:text-5xl tracking-tight text-slate-900 leading-tight">
           Thoughts on privacy, compliance, <br />
-          and <span className="font-instrument italic">stellar decentralization</span>.
+          and <span className="font-instrument font-semibold italic">stellar decentralization</span>.
         </h1>
         <p className="text-base text-slate-600 max-w-xl">
           Deep dives into zero-knowledge cryptography, smart contracts, and identity protocols shaping the future of global web3 compliance.

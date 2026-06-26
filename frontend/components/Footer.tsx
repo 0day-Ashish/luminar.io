@@ -104,21 +104,21 @@ export default function Footer() {
           className="flex items-center justify-center gap-12 whitespace-nowrap will-change-transform"
           style={{ transform: `translateX(${translateX}%)` }}
         >
-          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+          <span className="text-[20vw] sm:text-[18vw] md:text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
             Luminar
           </span>
-          <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
+          <svg viewBox="0 0 100 100" className="w-[15vw] h-[15vw] sm:w-[13vw] sm:h-[13vw] md:w-[10vw] md:h-[10vw] text-black shrink-0" fill="currentColor">
             <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
             <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
           </svg>
-          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+          <span className="text-[20vw] sm:text-[18vw] md:text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
             Luminar
           </span>
-          <svg viewBox="0 0 100 100" className="w-[10vw] h-[10vw] text-black shrink-0" fill="currentColor">
+          <svg viewBox="0 0 100 100" className="w-[15vw] h-[15vw] sm:w-[13vw] sm:h-[13vw] md:w-[10vw] md:h-[10vw] text-black shrink-0" fill="currentColor">
             <path d="M42,20 L25,30 L25,70 L42,80 L42,66 L34,61 L34,39 L42,34 Z" />
             <path d="M58,20 L75,30 L75,70 L58,80 L58,66 L66,61 L66,39 L58,34 Z" />
           </svg>
-          <span className="text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
+          <span className="text-[20vw] sm:text-[18vw] md:text-[14vw] font-black font-instrument tracking-tighter leading-none text-black">
             Luminar
           </span>
         </div>

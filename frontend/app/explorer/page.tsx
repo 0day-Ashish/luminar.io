@@ -5,8 +5,54 @@ import Link from "next/link";
 
 interface MetricCardProps {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   subtext: string;
+}
+
+function CountUp({ end, duration = 1200, prefix = "", suffix = "", useGrouping = false }: {
+  end: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+  useGrouping?: boolean;
+}) {
+  const [count, setCount] = useState(0);
+  const [prevEnd, setPrevEnd] = useState(0);
+
+  useEffect(() => {
+    let animationFrameId: number;
+    const startTime = performance.now();
+    const startVal = prevEnd;
+    const endVal = end;
+
+    const updateCount = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeOutQuad = (t: number) => t * (2 - t);
+      const currentCount = Math.floor(startVal + easeOutQuad(progress) * (endVal - startVal));
+
+      setCount(currentCount);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      } else {
+        setCount(endVal);
+        setPrevEnd(endVal);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [end, duration]);
+
+  const displayValue = useGrouping ? count.toLocaleString() : count.toString();
+  return <>{prefix}{displayValue}{suffix}</>;
 }
 
 function MetricCard({ label, value, subtext }: MetricCardProps) {
@@ -34,6 +80,7 @@ interface ActivityEvent {
 }
 
 export default function Explorer() {
+  const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState({
     total: 1482,
     today: 45,
@@ -95,6 +142,7 @@ export default function Explorer() {
 
   // Simulate incoming real-time KYC verifications to make it interactive and "live"
   useEffect(() => {
+    setMounted(true);
     const countries = ["India", "United States", "United Kingdom", "Germany", "Canada", "Singapore"];
     const docs = ["PAN Card", "Aadhaar Card", "Passport"];
 
@@ -153,17 +201,17 @@ export default function Explorer() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
         <MetricCard 
           label="Total Registrations" 
-          value={stats.total.toLocaleString()} 
+          value={<CountUp end={stats.total} useGrouping />} 
           subtext="Total unique user commitments" 
         />
         <MetricCard 
           label="Verified Today" 
-          value={`+${stats.today}`} 
+          value={<CountUp end={stats.today} prefix="+" />} 
           subtext="New attestations in past 24h" 
         />
         <MetricCard 
           label="Verification Success" 
-          value="100%" 
+          value={<CountUp end={100} suffix="%" />} 
           subtext="ZK proof mathematical soundness" 
         />
       </div>
@@ -236,6 +284,23 @@ export default function Explorer() {
               {/* SVG Donut Chart */}
               <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
                 <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
+                  <defs>
+                    <mask id="donut-mask">
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="48"
+                        stroke="white"
+                        strokeWidth="14"
+                        fill="none"
+                        strokeDasharray="301.6"
+                        strokeDashoffset={mounted ? "0" : "301.6"}
+                        strokeLinecap="round"
+                        style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                      />
+                    </mask>
+                  </defs>
+                  
                   {/* Background Track */}
                   <circle
                     cx="60"
@@ -244,43 +309,49 @@ export default function Explorer() {
                     className="stroke-slate-100 fill-none"
                     strokeWidth="12"
                   />
-                  {/* PAN Card Segment: 58% (Circumference = 2 * pi * 48 = 301.6) -> 174.9 length */}
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="48"
-                    className="stroke-[#2EA37A] fill-none transition-all duration-1000 ease-out"
-                    strokeWidth="12"
-                    strokeDasharray="174.9 301.6"
-                    strokeDashoffset="0"
-                    strokeLinecap="round"
-                  />
-                  {/* Aadhaar Card Segment: 32% -> 96.5 length, Offset = -174.9 */}
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="48"
-                    className="stroke-amber-500 fill-none transition-all duration-1000 ease-out"
-                    strokeWidth="12"
-                    strokeDasharray="96.5 301.6"
-                    strokeDashoffset="-174.9"
-                    strokeLinecap="round"
-                  />
-                  {/* Passport Segment: 10% -> 30.2 length, Offset = -271.4 */}
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="48"
-                    className="stroke-blue-500 fill-none transition-all duration-1000 ease-out"
-                    strokeWidth="12"
-                    strokeDasharray="30.2 301.6"
-                    strokeDashoffset="-271.4"
-                    strokeLinecap="round"
-                  />
+
+                  {/* Masked Group containing colored segments */}
+                  <g mask="url(#donut-mask)">
+                    {/* PAN Card Segment: 58% (Circumference = 2 * pi * 48 = 301.6) -> 174.9 length */}
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="48"
+                      className="stroke-[#2EA37A] fill-none"
+                      strokeWidth="12"
+                      strokeDasharray="174.9 301.6"
+                      strokeDashoffset="0"
+                      strokeLinecap="round"
+                    />
+                    {/* Aadhaar Card Segment: 32% -> 96.5 length, Offset = -174.9 */}
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="48"
+                      className="stroke-amber-500 fill-none"
+                      strokeWidth="12"
+                      strokeDasharray="96.5 301.6"
+                      strokeDashoffset="-174.9"
+                      strokeLinecap="round"
+                    />
+                    {/* Passport Segment: 10% -> 30.2 length, Offset = -271.4 */}
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="48"
+                      className="stroke-blue-500 fill-none"
+                      strokeWidth="12"
+                      strokeDasharray="30.2 301.6"
+                      strokeDashoffset="-271.4"
+                      strokeLinecap="round"
+                    />
+                  </g>
                 </svg>
                 {/* Center Text label inside Donut */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold font-instrument text-slate-800 leading-none">58%</span>
+                  <span className="text-lg font-bold font-instrument text-slate-800 leading-none">
+                    <CountUp end={58} />%
+                  </span>
                   <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-clash mt-0.5">PAN Card</span>
                 </div>
               </div>
@@ -294,7 +365,7 @@ export default function Explorer() {
                       <span className="font-bold text-slate-700 font-clash">{type.name}</span>
                     </div>
                     <span className="font-mono font-bold text-slate-650 bg-slate-100 px-1.5 py-0.5 rounded">
-                      {type.percentage}%
+                      <CountUp end={type.percentage} suffix="%" />
                     </span>
                   </div>
                 ))}

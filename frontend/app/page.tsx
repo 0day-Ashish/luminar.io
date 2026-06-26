@@ -10,7 +10,7 @@ export default function Home() {
   const [activeStep, setActiveStep] = useState(0);
   const [stepProgress, setStepProgress] = useState(0);
   const [activeDebugTab, setActiveDebugTab] = useState("timeline");
-  
+
   const [demoEmail, setDemoEmail] = useState("");
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSuccess, setDemoSuccess] = useState(false);
@@ -44,7 +44,7 @@ export default function Home() {
       setDemoSubmitting(false);
     }
   };
-  
+
 
 
   const complianceSteps = [
@@ -241,7 +241,7 @@ export default function Home() {
         </div>
 
         {/* Problem & Solution Columns (Luminar style) */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-62 mt-16 mb-12">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-32 mt-16 mb-12">
           {/* Left Column: Problem */}
           <div className="space-y-3 text-left">
             <span className="text-base font-clash text-slate-400 uppercase block">
@@ -400,9 +400,9 @@ export default function Home() {
             {/* Logo Icon Row */}
             <div className="mb-8">
               <div className="relative w-14 h-14 bg-white border border-slate-350 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300 overflow-hidden">
-                <img 
-                  src="/assets/dikeLogo.png" 
-                  alt="Dike Logo" 
+                <img
+                  src="/assets/dikeLogo.png"
+                  alt="Dike Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -449,7 +449,7 @@ export default function Home() {
                   <div className="relative w-44 h-28 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl p-3 flex flex-col justify-between overflow-hidden text-white">
                     {/* Grid Background overlay for tech feel */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
-                    
+
                     {/* Card Header */}
                     <div className="flex justify-between items-center relative z-10">
                       <div className="flex items-center gap-1.5">
@@ -650,8 +650,7 @@ export default function Home() {
                 <div
                   className="absolute left-0 top-0 h-full bg-[#2EA37A] transition-all duration-500 ease-out"
                   style={{
-                    width: `${
-                      activeDebugTab === "audio" ? "16.6%" :
+                    width: `${activeDebugTab === "audio" ? "16.6%" :
                         activeDebugTab === "timeline" ? "33.3%" :
                           activeDebugTab === "logs" ? "50%" :
                             activeDebugTab === "network" ? "66.6%" :
@@ -662,8 +661,7 @@ export default function Home() {
                 <div
                   className="absolute h-2 w-2 rounded-full bg-[#2EA37A] -top-[3px] transition-all duration-500 ease-out"
                   style={{
-                    left: `calc(${
-                      activeDebugTab === "audio" ? "16.6%" :
+                    left: `calc(${activeDebugTab === "audio" ? "16.6%" :
                         activeDebugTab === "timeline" ? "33.3%" :
                           activeDebugTab === "logs" ? "50%" :
                             activeDebugTab === "network" ? "66.6%" :
@@ -722,7 +720,7 @@ export default function Home() {
             </div>
 
             {/* Right Column */}
-            <div 
+            <div
               className="w-full bg-center rounded-3xl p-6 md:p-8 flex items-center justify-center min-h-[480px] relative overflow-hidden shadow-sm"
               style={{ backgroundImage: "url('/assets/features.jpg')" }}
             >
@@ -995,9 +993,9 @@ export default function Home() {
             {/* Logo Icon Row */}
             <div className="mb-8">
               <div className="relative w-14 h-14 bg-white rounded-2xl flex items-center justify-center hover:scale-105 transition-transform duration-300 overflow-hidden">
-                <img 
-                  src="/assets/risein.avif" 
-                  alt="Rise In Logo" 
+                <img
+                  src="/assets/risein.avif"
+                  alt="Rise In Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -1128,19 +1126,19 @@ export default function Home() {
                     <span>Demo request received! We will reach out shortly.</span>
                   </div>
                 ) : (
-                  <form onSubmit={handleDemoSubmit} className="flex items-center bg-white rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
+                  <form onSubmit={handleDemoSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center bg-transparent sm:bg-white rounded-3xl sm:rounded-full p-0 sm:p-1.5 focus-within:ring-0 sm:focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-none sm:shadow-sm gap-3 sm:gap-0 w-full">
                     <input
                       type="email"
                       required
                       placeholder="Your work email"
                       value={demoEmail}
                       onChange={(e) => setDemoEmail(e.target.value)}
-                      className="flex-grow bg-transparent px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none font-clash"
+                      className="flex-grow bg-white sm:bg-transparent px-6 sm:px-4 py-3.5 sm:py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 rounded-full sm:rounded-none focus:outline-none focus:ring-2 sm:focus:ring-0 focus:ring-slate-950 font-clash shadow-sm sm:shadow-none min-w-0"
                     />
                     <button
                       type="submit"
                       disabled={demoSubmitting}
-                      className="px-6 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-500 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0 font-clash cursor-pointer"
+                      className="px-6 py-3.5 sm:py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-500 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0 font-clash cursor-pointer w-full sm:w-auto"
                     >
                       {demoSubmitting ? "Submitting..." : "Book a demo"}
                     </button>
@@ -1149,11 +1147,18 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Abstract Dashed Circle SVG */}
+            {/* Right Column: Abstract Dashed Circle SVG & Logo */}
             <div className="absolute right-0 bottom-0 top-0 w-1/2 hidden lg:flex items-center justify-end pointer-events-none select-none overflow-hidden">
-              <svg viewBox="0 0 100 100" className="w-[120%] h-[120%] translate-x-1/3 text-white/30" fill="none" stroke="currentColor">
-                <circle cx="50" cy="50" r="48" strokeWidth="0.5" strokeDasharray="2 2" />
-              </svg>
+              <div className="relative w-[120%] h-[120%] translate-x-1/3 flex items-center justify-center">
+                <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full text-white/30" fill="none" stroke="currentColor">
+                  <circle cx="50" cy="50" r="48" strokeWidth="0.5" strokeDasharray="2 2" />
+                </svg>
+                <img
+                  src="/assets/logo.png"
+                  alt="Luminar Logo"
+                  className="w-82 h-82 object-contain drop-shadow-lg opacity-85"
+                />
+              </div>
             </div>
 
           </div>
