@@ -366,24 +366,11 @@ export default function Home() {
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Logo Icon and Badge Row */}
             <div className="flex items-center gap-3 mb-8">
-              <div className="relative w-14 h-14 bg-[#B4E155] rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300">
-                {/* Spiral SVG */}
-                <svg 
-                  viewBox="0 0 100 100" 
-                  className="w-8 h-8 text-[#143224]" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="7" 
-                  strokeLinecap="round"
-                >
-                  <path d="M50,50 C45,50 45,45 50,45 C57,45 57,55 50,55 C40,55 40,40 50,40 C62,40 62,60 50,60 C35,60 35,35 50,35 C68,35 68,65 50,65 C30,65 30,30 50,30 C72,30 72,70 50,70" />
-                </svg>
-                {/* Overlapping Hexagon Badge on Top Right */}
-                <div 
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-[#1B5E45] shadow-sm flex items-center justify-center" 
-                  style={{ 
-                    clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" 
-                  }}
+              <div className="relative w-14 h-14 bg-white border border-slate-350 rounded-2xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform duration-300 overflow-hidden">
+                <img 
+                  src="/assets/dikeLogo.png" 
+                  alt="Dike Logo" 
+                  className="w-full h-full object-cover"
                 />
               </div>
               {/* AGENT Badge */}

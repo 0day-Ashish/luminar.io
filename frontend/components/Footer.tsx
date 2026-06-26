@@ -78,7 +78,7 @@ export default function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold text-black tracking-wider font-cabinet uppercase">
             <Link href="/privacy" className="text-slate-600 hover:text-black transition">Privacy</Link>
             <Link href="/terms" className="text-slate-600 hover:text-black transition">Terms</Link>
-            <Link href="/dpa" className="text-slate-600 hover:text-black transition">Dpa</Link>
+            <Link href="/explorer" className="text-slate-600 hover:text-black transition">Explorer</Link>
             <Link href="/status" className="text-slate-600 hover:text-black transition">Status</Link>
             <Link href="/trust" className="text-slate-600 hover:text-black transition">Trust</Link>
           </div>
