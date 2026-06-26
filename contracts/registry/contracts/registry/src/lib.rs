@@ -9,10 +9,27 @@ mod verifier {
     );
 }
 
+mod sbt {
+    use soroban_sdk::{contractclient, Address, Env, String};
+
+    #[contractclient(name = "Client")]
+    pub trait SbtContract {
+        fn initialize(env: Env, admin: Address, name: String, symbol: String);
+        fn mint(env: Env, to: Address);
+        fn revoke(env: Env, holder: Address);
+        fn balance_of(env: Env, holder: Address) -> u64;
+        fn total_supply(env: Env) -> u64;
+        fn name(env: Env) -> String;
+        fn symbol(env: Env) -> String;
+        fn decimals(env: Env) -> u32;
+    }
+}
+
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
     VerifierContract,
+    SbtContract,
     Owner,
     Credential(Address),
     Nullifier(BytesN<32>),
@@ -39,6 +56,8 @@ pub enum Error {
     NullifierUsed = 5,
     VerificationFailed = 6,
     NotVerified = 7,
+    SbtMintFailed = 8,
+    SbtRevokeFailed = 9,
 }
 
 #[contract]
@@ -46,8 +65,13 @@ pub struct RegistryContract;
 
 #[contractimpl]
 impl RegistryContract {
-    /// Initialize the registry with an owner and the address of the deployed verifier contract.
-    pub fn initialize(env: Env, owner: Address, verifier_contract: Address) -> Result<(), Error> {
+    /// Initialize the registry with an owner, the verifier contract, and the SBT contract.
+    pub fn initialize(
+        env: Env,
+        owner: Address,
+        verifier_contract: Address,
+        sbt_contract: Address,
+    ) -> Result<(), Error> {
         if env.storage().instance().has(&DataKey::Owner) {
             return Err(Error::AlreadyInitialized);
         }
@@ -57,6 +81,9 @@ impl RegistryContract {
         env.storage()
             .instance()
             .set(&DataKey::VerifierContract, &verifier_contract);
+        env.storage()
+            .instance()
+            .set(&DataKey::SbtContract, &sbt_contract);
         Ok(())
     }
 
@@ -123,7 +150,17 @@ impl RegistryContract {
         };
         env.storage()
             .persistent()
-            .set(&DataKey::Credential(user), &credential);
+            .set(&DataKey::Credential(user.clone()), &credential);
+
+        // Mint a Soulbound Compliance Token (SBT) to the user
+        if let Some(sbt_address) = env
+            .storage()
+            .instance()
+            .get::<_, Address>(&DataKey::SbtContract)
+        {
+            let sbt_client = sbt::Client::new(&env, &sbt_address);
+            sbt_client.mint(&user);
+        }
 
         Ok(())
     }
@@ -155,7 +192,17 @@ impl RegistryContract {
         credential.active = false;
         env.storage()
             .persistent()
-            .set(&DataKey::Credential(user), &credential);
+            .set(&DataKey::Credential(user.clone()), &credential);
+
+        // Burn the Soulbound Token
+        if let Some(sbt_address) = env
+            .storage()
+            .instance()
+            .get::<_, Address>(&DataKey::SbtContract)
+        {
+            let sbt_client = sbt::Client::new(&env, &sbt_address);
+            sbt_client.revoke(&user);
+        }
 
         Ok(())
     }

@@ -25,6 +25,9 @@ export default function VerifyPage() {
     oracle_signature: string;
     min_age_secs: number;
     doc_type?: string;
+    oracle1_sig?: string;
+    oracle2_sig?: string;
+    oracle3_sig?: string;
   } | null>(null);
 
   // ZK computed inputs & proof
@@ -108,7 +111,10 @@ export default function VerifyPage() {
         walletAddress,
         hashes.commitment,
         hashes.nullifier,
-        kycData.min_age_secs
+        kycData.min_age_secs,
+        kycData.oracle1_sig || "",
+        kycData.oracle2_sig || "",
+        kycData.oracle3_sig || ""
       );
 
       setProofData(result);

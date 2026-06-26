@@ -1,11 +1,14 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{Env, Bytes, BytesN, Address};
+use soroban_sdk::{Env, Bytes, BytesN, Address, String};
 use soroban_sdk::testutils::Address as _;
 
 const VERIFIER_WASM: &[u8] =
     include_bytes!("../../../../verifier/ultrahonk_soroban_contract/target/wasm32v1-none/release/ultrahonk_soroban_contract.wasm");
+
+const SBT_WASM: &[u8] =
+    include_bytes!("../../../target/wasm32v1-none/release/luminar_sbt.wasm");
 
 #[test]
 fn test_is_verified_default_false() {
@@ -34,19 +37,25 @@ fn test_kyc_registration_and_revocation() {
     // 2. Deploy the verifier contract
     let verifier_address = env.register(VERIFIER_WASM, (vk_bytes,));
 
-    // 3. Deploy the registry contract
+    // 3. Deploy the SBT contract and initialize it
+    let sbt_address = env.register(SBT_WASM, ());
+    let sbt_client = sbt::Client::new(&env, &sbt_address);
+
+    // 4. Deploy the registry contract
     let registry_address = env.register(RegistryContract, ());
     let registry_client = RegistryContractClient::new(&env, &registry_address);
     env.mock_all_auths();
 
-    // 4. Initialize the registry
-    let owner = Address::generate(&env);
-    registry_client.initialize(&owner, &verifier_address);
+    // 5. Initialize SBT with the registry as admin
+    let sbt_name = String::from_str(&env, "Luminar Compliance SBT");
+    let sbt_symbol = String::from_str(&env, "LSBT");
+    sbt_client.initialize(&registry_address, &sbt_name, &sbt_symbol);
 
-    // 5. Setup test variables matching the circuits/kyc_proof public inputs
-    // User address needs to match whatever user we want (since verifier validates the proof against the public inputs,
-    // and the proof has stellar_address = 0xdead. But the registry contract accepts user parameter and checks require_auth.
-    // So the registry contract verifies the ZK proof using the public inputs array.
+    // 6. Initialize the registry with verifier + SBT
+    let owner = Address::generate(&env);
+    registry_client.initialize(&owner, &verifier_address, &sbt_address);
+
+    // 7. Setup test variables matching the circuits/kyc_proof public inputs
     let user = Address::generate(&env);
 
     // commitment and nullifier bytes from Prover.toml/public inputs:
@@ -66,14 +75,17 @@ fn test_kyc_registration_and_revocation() {
     ]);
     let min_age_secs = 567648000; // 18 years in seconds
 
-    // Initially, user is not verified
+    // Initially, user is not verified and has no SBT
     assert!(!registry_client.is_verified(&user));
+    assert_eq!(sbt_client.balance_of(&user), 0);
 
-    // Register user
+    // Register user — this should also mint an SBT
     registry_client.register(&user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
 
-    // User should be verified
+    // User should be verified AND hold an SBT
     assert!(registry_client.is_verified(&user));
+    assert_eq!(sbt_client.balance_of(&user), 1);
+    assert_eq!(sbt_client.total_supply(), 1);
 
     // Trying to register again should fail (AlreadyVerified)
     let err = registry_client.try_register(&user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
@@ -84,7 +96,9 @@ fn test_kyc_registration_and_revocation() {
     let err_nullifier = registry_client.try_register(&another_user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
     assert_eq!(err_nullifier, Err(Ok(Error::NullifierUsed)));
 
-    // Revoke user by owner
+    // Revoke user by owner — this should also burn the SBT
     registry_client.revoke(&user);
     assert!(!registry_client.is_verified(&user));
+    assert_eq!(sbt_client.balance_of(&user), 0);
+    assert_eq!(sbt_client.total_supply(), 0);
 }

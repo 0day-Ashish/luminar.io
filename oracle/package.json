@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "elliptic": "^6.6.1",
     "express": "^4.21.0",
     "firebase-admin": "^14.1.0"
   }

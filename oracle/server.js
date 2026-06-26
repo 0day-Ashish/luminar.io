@@ -3,6 +3,9 @@ const cors = require("cors");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const EC = require("elliptic").ec;
+const ec = new EC("secp256k1");
+const BN = require("bn.js");
 const { initializeApp, cert } = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 
@@ -139,6 +142,31 @@ if (!ORACLE_SECRET_KEY) {
       '       export ORACLE_SECRET_KEY="your-secret-key-here"'
   );
   process.exit(1);
+}
+
+// ---------------------------------------------------------------------------
+// Multi-Oracle Configuration (ECDSA Secp256k1)
+// ---------------------------------------------------------------------------
+const DEV_KEYS = {
+  oracle1: "0x491995b08484b77ab1a698cd81ede0adc1c4d93871817fce0fcfae0b9602957f",
+  oracle2: "0xc4951af12ab33c456f3b8faa6f900ce6d27bf029b72bb005c9445b58e85c79ce",
+  oracle3: "0x4625bec43221eb74b0817c451cc0587383cb49d2e900b2944322167a489d157a"
+};
+
+function getEllipticSignature(privateKeyHex, msgHash) {
+  const cleanHex = privateKeyHex.startsWith("0x") ? privateKeyHex.slice(2) : privateKeyHex;
+  const key = ec.keyFromPrivate(cleanHex, "hex");
+  const sigObj = key.sign(msgHash);
+  
+  let s = sigObj.s;
+  const halfOrder = ec.curve.n.ushrn(1);
+  if (s.gt(halfOrder)) {
+    s = ec.curve.n.sub(s);
+  }
+  
+  const rBytes = sigObj.r.toArrayLike(Buffer, "be", 32);
+  const sBytes = s.toArrayLike(Buffer, "be", 32);
+  return Buffer.concat([rBytes, sBytes]);
 }
 
 if (!SUREPASS_TOKEN) {
@@ -351,7 +379,23 @@ app.post("/verify", async (req, res) => {
       .digest("hex");
 
     // ------------------------------------------------------------------
-    // 8. Return the credential payload
+    // 8. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
+    // ------------------------------------------------------------------
+    const nameHashBuf = Buffer.from(nameHashHex.slice(2), "hex");
+    const idHashBuf = Buffer.from(idHashHex.slice(2), "hex");
+    const dobBuf = Buffer.alloc(8);
+    dobBuf.writeBigUInt64BE(BigInt(dobTimestamp));
+    const secretBuf = Buffer.from(secretHex.slice(2), "hex");
+
+    const consensusPayload = Buffer.concat([nameHashBuf, idHashBuf, dobBuf, secretBuf]);
+    const consensusHash = crypto.createHash("blake2s256").update(consensusPayload).digest();
+
+    const sig1 = getEllipticSignature(process.env.ORACLE_1_PRIVATE_KEY || DEV_KEYS.oracle1, consensusHash);
+    const sig2 = getEllipticSignature(process.env.ORACLE_2_PRIVATE_KEY || DEV_KEYS.oracle2, consensusHash);
+    const sig3 = getEllipticSignature(process.env.ORACLE_3_PRIVATE_KEY || DEV_KEYS.oracle3, consensusHash);
+
+    // ------------------------------------------------------------------
+    // 9. Return the credential payload
     // ------------------------------------------------------------------
     return res.json({
       name_hash: nameHashHex,
@@ -359,7 +403,10 @@ app.post("/verify", async (req, res) => {
       secret: secretHex,
       dob_timestamp: dobTimestamp,
       doc_type: docTypeLower,
-      oracle_signature: oracleSignature,
+      oracle_signature: oracleSignature, // Legacy HMAC signature
+      oracle1_sig: sig1.toString("hex"),
+      oracle2_sig: sig2.toString("hex"),
+      oracle3_sig: sig3.toString("hex")
     });
   } catch (err) {
     console.error("Error in POST /verify:", err);

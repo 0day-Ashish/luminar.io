@@ -11,6 +11,9 @@ interface KYCFormProps {
     doc_type: string;
     oracle_signature: string;
     min_age_secs: number;
+    oracle1_sig?: string;
+    oracle2_sig?: string;
+    oracle3_sig?: string;
   }) => void;
 }
 
@@ -62,6 +65,9 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
         dob_timestamp: result.dob_timestamp,
         doc_type: result.doc_type,
         oracle_signature: result.oracle_signature,
+        oracle1_sig: result.oracle1_sig,
+        oracle2_sig: result.oracle2_sig,
+        oracle3_sig: result.oracle3_sig,
         min_age_secs: MIN_AGE_SECS,
       });
     } catch (err: any) {

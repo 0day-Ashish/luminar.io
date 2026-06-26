@@ -80,6 +80,18 @@ export interface ProofGenerationResult {
   publicInputsBytes: Uint8Array;
 }
 
+export function signatureHexToBytes(hex: string): number[] {
+  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const bytes: number[] = [];
+  for (let i = 0; i < clean.length; i += 2) {
+    bytes.push(parseInt(clean.slice(i, i + 2), 16));
+  }
+  while (bytes.length < 64) {
+    bytes.push(0);
+  }
+  return bytes.slice(0, 64);
+}
+
 export async function generateKycProof(
   nameHash: string,
   idHash: string,
@@ -88,7 +100,10 @@ export async function generateKycProof(
   stellarAddress: string,
   commitment: string,
   nullifier: string,
-  minAgeSecs: number
+  minAgeSecs: number,
+  sig1Hex: string,
+  sig2Hex: string,
+  sig3Hex: string
 ): Promise<ProofGenerationResult> {
   const { Noir } = await import("@noir-lang/noir_js");
   const { UltraHonkBackend } = await import("@aztec/bb.js");
@@ -105,6 +120,9 @@ export async function generateKycProof(
     id_hash: padTo32BytesHex(idHash),
     dob_timestamp: dobTimestamp.toString(),
     secret: padTo32BytesHex(secret),
+    sig1: signatureHexToBytes(sig1Hex),
+    sig2: signatureHexToBytes(sig2Hex),
+    sig3: signatureHexToBytes(sig3Hex),
     commitment: padTo32BytesHex(commitment),
     nullifier: padTo32BytesHex(nullifier),
     stellar_address: stellarField,
