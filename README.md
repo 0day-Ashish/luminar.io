@@ -1,6 +1,6 @@
 # Luminar: Decentralized Zero-Knowledge Identity Registry on Stellar
 
-![Luminar Logo](frontend/public/assets/logo2.jpeg)
+![Luminar Logo](frontend/public/assets/@StellarOrg.png)
 
 Luminar is a premium, high-fidelity, decentralized identity verification (KYC) system built on the Stellar Soroban smart contract network. By leveraging Zero-Knowledge (ZK) cryptography (Noir/UltraHonk), Luminar enables users to verify their identity credentials (such as PAN Cards, Aadhaar Cards, and Passports) and prove compliance (e.g., "Over 18") to on-chain apps **without revealing any of their personal identifiable information (PII)** or leaving a permanent data footprint.
 
