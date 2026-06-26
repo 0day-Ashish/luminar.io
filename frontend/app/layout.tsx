@@ -4,9 +4,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import WalletButton from "../components/WalletButton";
 import Link from "next/link";
+import Image from "next/image";
 import Footer from "../components/Footer";
 import { ReactLenis } from "lenis/react";
 import { WalletProvider } from "../context/WalletContext";
+import logo from "../public/assets/logo.png";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,15 +50,17 @@ export default function RootLayout({
           <ReactLenis root>
             {/* Sticky Reveal Wrapper */}
             <div className="relative z-10 bg-[#F2F0EF] shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col min-h-screen ">
-            <header className="w-full bg-[#F2F0EF] mt-14 sm:mt-16">
+            <header className="w-full bg-[#F2F0EF] mt-14 sm:mt-16 mb-3">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16
                flex items-center justify-between">
                 {/* Brand Logo (Left) */}
                 <Link href="/" className="flex items-center space-x-2">
-                  {/* LOGO PLACEHOLDER */}
-                  <span className="text-xl font-extrabold text-black font-zodiak ">
-                    Luminar
-                  </span>
+                  <Image
+                    src={logo}
+                    alt="Luminar Logo"
+                    priority
+                    className="h-90 w-auto object-contain pointer-events-none -ml-26"></Image>
+                  
                 </Link>
 
                  {/* Navigation links & buttons (Right) */}

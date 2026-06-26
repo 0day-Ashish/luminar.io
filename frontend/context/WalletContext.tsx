@@ -42,6 +42,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (accessRes.address) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("walletDisconnected");
+        }
         setWalletAddress(accessRes.address);
       }
     } catch (error) {
@@ -52,6 +55,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   };
 
   const disconnectWallet = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("walletDisconnected", "true");
+    }
     setWalletAddress(null);
   };
 
@@ -59,6 +65,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkConnection = async () => {
       try {
+        if (typeof window !== "undefined" && localStorage.getItem("walletDisconnected") === "true") {
+          return;
+        }
+
         const connectedRes = await isConnected();
         if (!connectedRes.isConnected) return;
 

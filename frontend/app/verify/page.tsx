@@ -168,7 +168,7 @@ export default function VerifyPage() {
     <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16 w-full font-cabinet">
       <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-cabinet">KYC Verification Flow</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-zodiak">KYC Verification Flow</h1>
           <p className="text-slate-550 text-sm mt-1.5 font-cabinet">
             Complete the verification steps below to generate your private identity credential.
           </p>
@@ -258,7 +258,7 @@ export default function VerifyPage() {
                 🔌
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-cabinet">Connect Your Wallet</h3>
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">Connect Your Wallet</h3>
                 <p className="text-slate-550 text-sm font-cabinet leading-relaxed">
                   We use your Stellar wallet to establish your identity anchor. Click below to connect via Freighter.
                 </p>
@@ -287,7 +287,7 @@ export default function VerifyPage() {
                 🔐
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-cabinet">Generate Compliance Proof</h3>
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">Generate Compliance Proof</h3>
                 <p className="text-slate-550 text-sm font-cabinet leading-relaxed">
                   Your identity has been validated by the oracle. We will now generate a zero-knowledge proof locally on your device to certify you are over 18 years old.
                 </p>
@@ -318,7 +318,7 @@ export default function VerifyPage() {
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-cabinet">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 font-zodiak">
                   {isAlreadyVerified ? "Verification Complete!" : "Compliance Proof Generated!"}
                 </h3>
                 <p className="text-slate-550 text-sm font-cabinet leading-relaxed">

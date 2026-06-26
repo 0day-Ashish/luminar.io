@@ -128,7 +128,7 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-1 md:pt-2 pb-12 flex flex-col items-start text-left">
         
         {/* Main Heading using Cabinet Grotesk font */}
-        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold tracking-tighter text-slate-900 leading-[1.05] font-cabinet max-w-3xl mb-8">
+        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold tracking-tighter text-slate-900 leading-[1.05] font-zodiak max-w-3xl mb-8">
           Verify compliance <br />
           before your users transact.
         </h1>
@@ -187,7 +187,7 @@ export default function Home() {
             <span className="text-xs font-bold text-luminar uppercase tracking-wider">
               Zero-Knowledge Engine
             </span>
-            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 font-cabinet tracking-tight">
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 font-zodiak tracking-tight">
               Decentralized ID with no data footprint.
             </h3>
             <p className="text-sm text-slate-650 leading-relaxed font-cabinet">
@@ -303,7 +303,7 @@ export default function Home() {
                       <span className="text-xs font-mono text-white/50 block mb-2">
                         {step.stepNumber}
                       </span>
-                      <h3 className="text-2xl md:text-4xl font-bold tracking-tight font-cabinet leading-tight">
+                      <h3 className="text-2xl md:text-4xl font-bold tracking-tight font-zodiak leading-tight">
                         {step.title}
                       </h3>
                       <p className="text-base text-white/80 leading-relaxed font-cabinet mt-3 max-w-md">
@@ -398,7 +398,7 @@ export default function Home() {
             </div>
 
             {/* Testimonial Quote */}
-            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-cabinet max-w-3xl mb-8">
+            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-zodiak max-w-3xl mb-8">
               “Luminar gives us far more confidence in every mobile release. It recently caught a critical iOS issue early enough for us to recover quickly and avoid a much bigger incident.”
             </blockquote>
 
@@ -419,7 +419,7 @@ export default function Home() {
             <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">
               02 Core features
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-slate-900 tracking-tight leading-tight mt-2 font-cabinet">
+            <h2 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-slate-900 tracking-tight leading-tight mt-2 font-zodiak">
               Built for the complexity of mobile apps.
             </h2>
           </div>
@@ -452,7 +452,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="text-left mt-2">
-                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-cabinet">
+                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-zodiak">
                   Works across text, visuals, and audio
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-cabinet">
@@ -485,7 +485,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="text-left mt-2">
-                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-cabinet">
+                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-zodiak">
                   Tests that keep up with your app
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-cabinet">
@@ -527,7 +527,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="text-left mt-2">
-                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-cabinet">
+                <h4 className="text-sm md:text-base font-bold text-slate-900 tracking-tight leading-snug font-zodiak">
                   Complete visibility into every run
                 </h4>
                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed mt-2 font-cabinet">
@@ -550,7 +550,7 @@ export default function Home() {
               <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">
                 03 Debug faster
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-slate-900 tracking-tight leading-tight mt-2 font-cabinet">
+              <h2 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-slate-900 tracking-tight leading-tight mt-2 font-zodiak">
                 See exactly what happened in every run.
               </h2>
               <p className="text-sm sm:text-base text-slate-500 leading-relaxed mt-4 font-cabinet">
@@ -970,7 +970,7 @@ export default function Home() {
             </div>
 
             {/* Testimonial Quote */}
-            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-cabinet max-w-3xl mb-8">
+            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-zodiak max-w-3xl mb-8">
               “Luminar gives us confidence in every release by validating the app on real iPhones before it goes live. It has made our release process more predictable and reliable.”
             </blockquote>
 
@@ -995,7 +995,7 @@ export default function Home() {
                 <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">
                   04 Team
                 </span>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-snug tracking-tight font-cabinet max-w-md">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-snug tracking-tight font-zodiak max-w-md">
                   Built by people who have worked on mobile systems, developer tools, and testing at scale. <span className="text-slate-400">Our team comes from Apple, Palantir, and London's leading startups.</span>
                 </h3>
               </div>
@@ -1061,7 +1061,7 @@ export default function Home() {
             </div>
 
             {/* Testimonial Quote */}
-            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-cabinet max-w-3xl mb-8">
+            <blockquote className="text-xl sm:text-2xl md:text-[30px] font-bold text-slate-900 tracking-tight leading-snug font-zodiak max-w-3xl mb-8">
               “Testing should increase velocity, but teams spend more time fixing tests than shipping. Luminar is the first tool I’ve found that genuinely changes this, making mobile end-to-end testing finally possible.”
             </blockquote>
 
@@ -1086,7 +1086,7 @@ export default function Home() {
                 <span className="text-xs font-mono text-[#1B5E45] uppercase tracking-wider block">
                   05 Get started
                 </span>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] tracking-tight font-cabinet max-w-xl">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-[1.1] tracking-tight font-zodiak max-w-xl">
                   Start testing your app the way it's actually used.
                 </h2>
                 <p className="text-sm sm:text-base font-semibold text-slate-800 leading-relaxed font-cabinet max-w-lg">

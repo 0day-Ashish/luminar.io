@@ -46,8 +46,8 @@ export default function ProofStep({
         {status === "completed" ? "✓" : stepNumber}
       </div>
       <div>
-        <h4 className={`text-base font-cabinet transition-all duration-300 ${currentStyles.title}`}>{title}</h4>
-        <p className={`text-sm mt-1 font-cabinet transition-all duration-300 ${currentStyles.description}`}>{description}</p>
+        <h4 className={`text-base font-zodiak transition-all duration-300 ${currentStyles.title}`}>{title}</h4>
+        <p className={`text-sm mt-1 font-zodiak transition-all duration-300 ${currentStyles.description}`}>{description}</p>
       </div>
     </div>
   );

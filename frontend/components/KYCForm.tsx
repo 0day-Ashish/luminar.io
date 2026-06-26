@@ -74,7 +74,7 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
       className="p-6 bg-white border border-slate-300 rounded-2xl space-y-4 max-w-md w-full text-slate-800 shadow-sm"
     >
       <div className="border-b border-slate-100 pb-3 mb-2">
-        <h3 className="text-lg font-bold text-slate-900 font-cabinet">Secure Identity Verification</h3>
+        <h3 className="text-lg font-bold text-slate-900 font-zodiak">Secure Identity Verification</h3>
         <p className="text-xs text-slate-500 mt-1">
           Provide your information to get a signed commitment from the oracle.
         </p>
