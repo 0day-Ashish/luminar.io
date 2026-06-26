@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { ReactLenis } from "lenis/react";
 import { WalletProvider } from "../context/WalletContext";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -83,6 +84,7 @@ export default function RootLayout({
           {/* Footer (Sticky bottom to reveal on scroll) */}
           <Footer />
         </ReactLenis>
+        <Analytics/>
         </WalletProvider>
       </body>
     </html>
