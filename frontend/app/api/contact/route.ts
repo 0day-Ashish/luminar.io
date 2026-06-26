@@ -15,11 +15,21 @@ if (!getApps().length) {
       });
       console.log("Firebase Admin successfully initialized from local file.");
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      initializeApp({
-        credential: cert(serviceAccount),
-      });
-      console.log("Firebase Admin successfully initialized from environment variable.");
+      try {
+        const val = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
+        let serviceAccount;
+        if (val.startsWith("{")) {
+          serviceAccount = JSON.parse(val);
+        } else {
+          serviceAccount = JSON.parse(Buffer.from(val, "base64").toString("utf8"));
+        }
+        initializeApp({
+          credential: cert(serviceAccount),
+        });
+        console.log("Firebase Admin successfully initialized from environment variable.");
+      } catch (err) {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT env:", err);
+      }
     } else {
       console.error(`Firebase service account file not found, and FIREBASE_SERVICE_ACCOUNT env is missing.`);
     }
