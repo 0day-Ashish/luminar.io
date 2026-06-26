@@ -1,6 +1,123 @@
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+const admin = require("firebase-admin");
+
+let db = null;
+let useLocalDb = false;
+const LOCAL_DB_PATH = path.join(__dirname, "local_secrets_db.json");
+
+// Helper to get/set local JSON DB
+function readLocalDb() {
+  try {
+    if (!fs.existsSync(LOCAL_DB_PATH)) {
+      fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify({}), "utf8");
+    }
+    return JSON.parse(fs.readFileSync(LOCAL_DB_PATH, "utf8"));
+  } catch (err) {
+    console.error("Error reading local JSON DB:", err);
+    return {};
+  }
+}
+
+function writeLocalDb(data) {
+  try {
+    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error("Error writing local JSON DB:", err);
+  }
+}
+
+// Initialize Firebase Admin
+try {
+  let serviceAccount = null;
+  const localFirebaseJson = path.join(process.cwd(), "firebase.json");
+  const parentFirebaseJson = path.join(process.cwd(), "..", "frontend", "firebase.json");
+
+  if (fs.existsSync(localFirebaseJson)) {
+    serviceAccount = JSON.parse(fs.readFileSync(localFirebaseJson, "utf8"));
+    console.log("Oracle: Found firebase.json in current directory.");
+  } else if (fs.existsSync(parentFirebaseJson)) {
+    serviceAccount = JSON.parse(fs.readFileSync(parentFirebaseJson, "utf8"));
+    console.log("Oracle: Found firebase.json in frontend directory.");
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    const val = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
+    if (val.startsWith("{")) {
+      serviceAccount = JSON.parse(val);
+    } else {
+      serviceAccount = JSON.parse(Buffer.from(val, "base64").toString("utf8"));
+    }
+    console.log("Oracle: Found FIREBASE_SERVICE_ACCOUNT environment variable.");
+  }
+
+  if (serviceAccount) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    // Use the custom database ID "support" just like frontend
+    try {
+      db = admin.firestore("support");
+      console.log("Oracle: Firebase Admin successfully initialized using 'support' database.");
+    } catch (e) {
+      db = admin.firestore();
+      console.log("Oracle: Firebase Admin successfully initialized using default database.");
+    }
+  } else {
+    console.warn("WARNING: Firebase service account details not found. Running in Local JSON fallback mode.");
+    useLocalDb = true;
+  }
+} catch (error) {
+  console.error("Error initializing Firebase Admin SDK:", error);
+  console.warn("Falling back to Local JSON database.");
+  useLocalDb = true;
+}
+
+// Database helper operations
+async function getStoredSecret(idHashHex) {
+  if (useLocalDb || !db) {
+    const localDb = readLocalDb();
+    return localDb[idHashHex] || null;
+  }
+
+  try {
+    const docRef = db.collection("oracle_secrets").doc(idHashHex);
+    const doc = await docRef.get();
+    if (doc.exists) {
+      return doc.data().secret;
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching secret from Firestore:", err);
+    // Fall back to local DB if firestore query fails (robustness)
+    const localDb = readLocalDb();
+    return localDb[idHashHex] || null;
+  }
+}
+
+async function saveStoredSecret(idHashHex, secretHex) {
+  if (useLocalDb || !db) {
+    const localDb = readLocalDb();
+    localDb[idHashHex] = secretHex;
+    writeLocalDb(localDb);
+    return;
+  }
+
+  try {
+    const docRef = db.collection("oracle_secrets").doc(idHashHex);
+    await docRef.set({
+      secret: secretHex,
+      createdAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Error saving secret to Firestore:", err);
+    // Fallback to local DB
+    const localDb = readLocalDb();
+    localDb[idHashHex] = secretHex;
+    writeLocalDb(localDb);
+  }
+}
 
 // BN254 (alt_bn128) scalar field prime — all field elements are reduced mod this
 const BN254_PRIME = BigInt(
@@ -198,27 +315,28 @@ app.post("/verify", async (req, res) => {
     }
 
     // ------------------------------------------------------------------
-    // 4. Hash private inputs with SHA-256
+    // 4. Hash private inputs with SHA-256 and reduce to BN254 field elements
     // ------------------------------------------------------------------
     const nameHash = crypto.createHash("sha256").update(name).digest();
     const idHash = crypto.createHash("sha256").update(id_number).digest();
 
-    // ------------------------------------------------------------------
-    // 5. Generate a cryptographically random secret (32 bytes)
-    // ------------------------------------------------------------------
-    const secretBytes = crypto.randomBytes(32);
-
-    // ------------------------------------------------------------------
-    // 6. Reduce to BN254 field elements
-    //    The frontend will compute the Poseidon commitment from these.
-    // ------------------------------------------------------------------
     const nameHashField = bufferToBigInt(nameHash);
     const idHashField = bufferToBigInt(idHash);
-    const secretField = bufferToBigInt(secretBytes);
 
     const nameHashHex = "0x" + nameHashField.toString(16).padStart(64, "0");
     const idHashHex = "0x" + idHashField.toString(16).padStart(64, "0");
-    const secretHex = "0x" + secretField.toString(16).padStart(64, "0");
+
+    // ------------------------------------------------------------------
+    // 5. Get or generate the cryptographically secure secret (32 bytes)
+    //    We key the secret on the unique document id_hash for sybil protection.
+    // ------------------------------------------------------------------
+    let secretHex = await getStoredSecret(idHashHex);
+    if (!secretHex) {
+      const secretBytes = crypto.randomBytes(32);
+      const secretField = bufferToBigInt(secretBytes);
+      secretHex = "0x" + secretField.toString(16).padStart(64, "0");
+      await saveStoredSecret(idHashHex, secretHex);
+    }
 
     // ------------------------------------------------------------------
     // 7. Sign the payload with HMAC-SHA256

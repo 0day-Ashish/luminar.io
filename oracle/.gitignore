@@ -1,3 +1,5 @@
 /node_modules
 node_modules
 .env
+local_secrets_db.json
+*.json.local
