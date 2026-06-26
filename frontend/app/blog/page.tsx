@@ -68,6 +68,8 @@ export default function BlogPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
+      <title>Luminar Journal & Blog | ZK-Proofs & Stellar compliance</title>
+      <meta name="description" content="Explore articles and tutorials on zero-knowledge cryptography, decentralized identity protocols, and on-chain compliance verifiers on Stellar." />
       {/* Blog Header */}
       <div className="max-w-3xl mb-16 space-y-4">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">

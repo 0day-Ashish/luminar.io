@@ -167,6 +167,8 @@ export default function VerifyPage() {
 
   return (
     <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16 w-full font-clash">
+      <title>Verify Identity | Luminar</title>
+      <meta name="description" content="Secure your cryptographic zero-knowledge proof for on-chain Stellar compliance. Verify your identity without sharing personal information." />
       <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-instrument">KYC Verification Flow</h1>

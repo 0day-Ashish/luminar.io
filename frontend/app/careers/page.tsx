@@ -1,6 +1,11 @@
 import React from "react";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Careers",
+  description: "Join the Luminar team. Build the future of private compliance, decentralized identity, and on-chain zero-knowledge protocols on Stellar.",
+};
+
 export default function CareersPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">

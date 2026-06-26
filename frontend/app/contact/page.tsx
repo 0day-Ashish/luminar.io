@@ -60,6 +60,8 @@ export default function ContactPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
+      <title>Contact Us | Luminar</title>
+      <meta name="description" content="Reach out to the Luminar team. Send general inquiries, speculative applications, or request integration support for Stellar zero-knowledge compliance." />
       {/* Page Header */}
       <div className="max-w-3xl mb-16 space-y-4">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">

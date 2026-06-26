@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Terms of Service",
+  description: "Terms and conditions for utilizing the Luminar ZK compliance protocol and on-chain verification infrastructure.",
+};
+
 export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-clash">

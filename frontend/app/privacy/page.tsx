@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Privacy Policy",
+  description: "Learn about how Luminar handles privacy. We prioritize client-side zero-knowledge proof generation to keep personal identity documents entirely private.",
+};
+
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-slate-800 font-clash">

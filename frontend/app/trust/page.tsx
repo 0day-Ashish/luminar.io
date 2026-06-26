@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Trust Center - Luminar.io",
+  title: "Trust Center",
   description: "Learn how Luminar uses zero-knowledge cryptography and Soroban smart contracts to verify identity without sacrificing privacy.",
 };
 
