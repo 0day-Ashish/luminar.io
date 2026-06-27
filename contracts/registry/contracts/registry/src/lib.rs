@@ -18,6 +18,7 @@ mod sbt {
         fn mint(env: Env, to: Address);
         fn revoke(env: Env, holder: Address);
         fn balance_of(env: Env, holder: Address) -> u64;
+        fn expires_at(env: Env, holder: Address) -> u64;
         fn total_supply(env: Env) -> u64;
         fn name(env: Env) -> String;
         fn symbol(env: Env) -> String;
@@ -104,22 +105,29 @@ impl RegistryContract {
             return Err(Error::NotInitialized);
         }
 
-        // Prevent duplicate registration
-        if env
+        // Allow renewal if expired or inactive
+        if let Some(existing_cred) = env
             .storage()
             .persistent()
-            .has(&DataKey::Credential(user.clone()))
+            .get::<_, KYCCredential>(&DataKey::Credential(user.clone()))
         {
-            return Err(Error::AlreadyVerified);
+            let expiry_duration = 31_536_000u64;
+            let expired = env.ledger().timestamp() >= existing_cred.issued_at + expiry_duration;
+            if !expired && existing_cred.active {
+                return Err(Error::AlreadyVerified);
+            }
         }
 
         // Prevent nullifier reuse (double-spend protection)
-        if env
+        // Store the address in the nullifier map to allow self-renewal but prevent other wallets from reusing it
+        if let Some(existing_owner) = env
             .storage()
             .persistent()
-            .has(&DataKey::Nullifier(nullifier.clone()))
+            .get::<_, Address>(&DataKey::Nullifier(nullifier.clone()))
         {
-            return Err(Error::NullifierUsed);
+            if existing_owner != user {
+                return Err(Error::NullifierUsed);
+            }
         }
 
         // Cross-contract call to the verifier to validate the ZK proof
@@ -135,10 +143,10 @@ impl RegistryContract {
             _ => return Err(Error::VerificationFailed),
         }
 
-        // Store the nullifier to prevent reuse
+        // Store/associate the nullifier with the user address
         env.storage()
             .persistent()
-            .set(&DataKey::Nullifier(nullifier), &true);
+            .set(&DataKey::Nullifier(nullifier), &user);
 
         // Store the credential
         let credential = KYCCredential {
@@ -170,7 +178,14 @@ impl RegistryContract {
         env.storage()
             .persistent()
             .get::<_, KYCCredential>(&DataKey::Credential(user))
-            .map(|cred| cred.active)
+            .map(|cred| {
+                if !cred.active {
+                    return false;
+                }
+                let expiry_duration = 31_536_000u64;
+                let expired = env.ledger().timestamp() >= cred.issued_at + expiry_duration;
+                !expired
+            })
             .unwrap_or(false)
     }
 

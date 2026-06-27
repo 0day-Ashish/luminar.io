@@ -28,6 +28,7 @@
     ],
     [],
     [],
+    [],
     [
       [
         "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
@@ -35,7 +36,7 @@
           "function": {
             "contract_fn": {
               "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
-              "function_name": "revoke",
+              "function_name": "mint",
               "args": [
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
@@ -53,7 +54,7 @@
   "ledger": {
     "protocol_version": 26,
     "sequence_number": 0,
-    "timestamp": 0,
+    "timestamp": 31536000,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
     "min_persistent_entry_ttl": 4096,
@@ -79,7 +80,7 @@
               },
               "durability": "persistent",
               "val": {
-                "u64": "0"
+                "u64": "1"
               }
             }
           },
@@ -106,7 +107,7 @@
               },
               "durability": "persistent",
               "val": {
-                "u64": "0"
+                "u64": "63072000"
               }
             }
           },
@@ -174,7 +175,7 @@
                         ]
                       },
                       "val": {
-                        "u64": "0"
+                        "u64": "1"
                       }
                     }
                   ]

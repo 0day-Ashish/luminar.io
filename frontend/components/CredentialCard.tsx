@@ -9,6 +9,7 @@ interface CredentialCardProps {
   commitment?: string;
   nullifier?: string;
   oracleSignature?: string;
+  expiresAt?: number;
 }
 
 export default function CredentialCard({
@@ -17,10 +18,16 @@ export default function CredentialCard({
   commitment,
   nullifier,
   oracleSignature,
+  expiresAt,
 }: CredentialCardProps) {
   const { walletAddress } = useWallet();
   const [isFlipped, setIsFlipped] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const isExpired = expiresAt ? (expiresAt * 1000 < Date.now()) : false;
+  const expiryDateStr = expiresAt && expiresAt > 0
+    ? new Date(expiresAt * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
 
   const handleCopy = (e: React.MouseEvent, text: string, fieldName: string) => {
     e.stopPropagation();
@@ -47,6 +54,15 @@ export default function CredentialCard({
   };
 
   const renderBadge = () => {
+    if (isExpired) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-red-500/20 text-red-300 border-red-500/30 shadow-sm animate-pulse">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+          Expired KYC
+        </span>
+      );
+    }
+
     const badgeBase =
       "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-white/15 text-white border-white/20 shadow-sm";
 
@@ -216,6 +232,12 @@ export default function CredentialCard({
               <span className="block text-[8px] text-[#06241a] uppercase font-semibold opacity-85">Issued</span>
               <span className="text-white">{issueDate}</span>
             </div>
+            {expiryDateStr && (
+              <div>
+                <span className="block text-[8px] text-[#06241a] uppercase font-semibold opacity-85">Expires</span>
+                <span className="text-white">{expiryDateStr}</span>
+              </div>
+            )}
             <div>
               <span className="block text-[8px] text-[#06241a] uppercase font-semibold opacity-85">Ledger</span>
               <span className="text-white font-medium">Stellar Testnet</span>

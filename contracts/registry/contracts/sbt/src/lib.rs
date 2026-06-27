@@ -14,6 +14,8 @@ pub enum DataKey {
     Admin,
     /// Per-holder balance: always 0 or 1.
     Balance(Address),
+    /// Expiration timestamp in seconds.
+    Expiry(Address),
     /// Global counter of active SBTs.
     TotalSupply,
     /// Human-readable token name.
@@ -35,7 +37,7 @@ pub enum Error {
     NotInitialized = 2,
     /// Caller is not the admin (registry contract).
     Unauthorized = 3,
-    /// The target address already holds an SBT.
+    /// The target address already holds an active SBT.
     AlreadyHoldsToken = 4,
     /// The target address does not hold an SBT.
     NoTokenToRevoke = 5,
@@ -84,7 +86,7 @@ impl SoulboundToken {
     // -----------------------------------------------------------------------
 
     /// Mint exactly 1 SBT to `to`. Only the admin may call this.
-    /// Fails if `to` already holds a token.
+    /// Fails if `to` already holds an active token.
     pub fn mint(env: Env, to: Address) -> Result<(), Error> {
         let admin: Address = env
             .storage()
@@ -93,14 +95,22 @@ impl SoulboundToken {
             .ok_or(Error::NotInitialized)?;
         admin.require_auth();
 
-        // Prevent double-minting
+        // Prevent double-minting if token is still active
         let current_balance: u64 = env
             .storage()
             .persistent()
             .get(&DataKey::Balance(to.clone()))
             .unwrap_or(0);
 
-        if current_balance > 0 {
+        let current_expiry: u64 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Expiry(to.clone()))
+            .unwrap_or(0);
+
+        let expired = env.ledger().timestamp() >= current_expiry;
+
+        if current_balance > 0 && !expired {
             return Err(Error::AlreadyHoldsToken);
         }
 
@@ -109,15 +119,24 @@ impl SoulboundToken {
             .persistent()
             .set(&DataKey::Balance(to.clone()), &1u64);
 
-        // Increment total supply
-        let supply: u64 = env
-            .storage()
-            .instance()
-            .get(&DataKey::TotalSupply)
-            .unwrap_or(0);
+        // Set expiry (365 days in seconds: 31,536,000)
+        let expiry_duration = 31_536_000u64;
+        let expires_at = env.ledger().timestamp() + expiry_duration;
         env.storage()
-            .instance()
-            .set(&DataKey::TotalSupply, &(supply + 1));
+            .persistent()
+            .set(&DataKey::Expiry(to.clone()), &expires_at);
+
+        // Only increment total supply if it's a completely new token record
+        if current_balance == 0 {
+            let supply: u64 = env
+                .storage()
+                .instance()
+                .get(&DataKey::TotalSupply)
+                .unwrap_or(0);
+            env.storage()
+                .instance()
+                .set(&DataKey::TotalSupply, &(supply + 1));
+        }
 
         env.events().publish(
             (symbol_short!("mint"),),
@@ -147,10 +166,13 @@ impl SoulboundToken {
             return Err(Error::NoTokenToRevoke);
         }
 
-        // Set balance to 0
+        // Set balance and expiry to 0
         env.storage()
             .persistent()
             .set(&DataKey::Balance(holder.clone()), &0u64);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Expiry(holder.clone()), &0u64);
 
         // Decrement total supply
         let supply: u64 = env
@@ -176,11 +198,36 @@ impl SoulboundToken {
     // Public Read-Only Methods
     // -----------------------------------------------------------------------
 
-    /// Returns `1` if the holder has an active SBT, `0` otherwise.
+    /// Returns `1` if the holder has an active and valid (not expired) SBT, `0` otherwise.
     pub fn balance_of(env: Env, holder: Address) -> u64 {
+        let balance: u64 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Balance(holder.clone()))
+            .unwrap_or(0);
+
+        if balance == 0 {
+            return 0;
+        }
+
+        let expiry: u64 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Expiry(holder))
+            .unwrap_or(0);
+
+        if env.ledger().timestamp() >= expiry {
+            return 0; // Token is expired
+        }
+
+        1
+    }
+
+    /// Get the expiration timestamp of a holder's compliance SBT.
+    pub fn expires_at(env: Env, holder: Address) -> u64 {
         env.storage()
             .persistent()
-            .get(&DataKey::Balance(holder))
+            .get(&DataKey::Expiry(holder))
             .unwrap_or(0)
     }
 

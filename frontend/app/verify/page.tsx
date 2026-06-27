@@ -7,7 +7,7 @@ import ProofStep from "../../components/ProofStep";
 import KYCForm from "../../components/KYCForm";
 import CredentialCard from "../../components/CredentialCard";
 import { computeHashes, generateKycProof } from "../../lib/proof";
-import { checkIsVerified, submitRegistration } from "../../lib/stellar";
+import { checkIsVerified, checkSbtExpiration, submitRegistration } from "../../lib/stellar";
 
 type StepType = "connect" | "kyc" | "proof" | "complete";
 
@@ -15,6 +15,8 @@ export default function VerifyPage() {
   const { walletAddress, connectWallet, isConnecting } = useWallet();
   const [currentStep, setCurrentStep] = useState<StepType>("connect");
   const [isAlreadyVerified, setIsAlreadyVerified] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<number | undefined>(undefined);
+  const [isExpiredCredential, setIsExpiredCredential] = useState(false);
   
   // Data from Oracle
   const [kycData, setKycData] = useState<{
@@ -52,10 +54,20 @@ export default function VerifyPage() {
         setError(null);
         try {
           const verified = await checkIsVerified(walletAddress);
+          const expiry = await checkSbtExpiration(walletAddress);
+          setExpiresAt(expiry);
+          
           if (verified) {
             setIsAlreadyVerified(true);
+            setIsExpiredCredential(false);
+            setCurrentStep("complete");
+          } else if (expiry > 0 && expiry * 1000 < Date.now()) {
+            setIsAlreadyVerified(false);
+            setIsExpiredCredential(true);
             setCurrentStep("complete");
           } else {
+            setIsAlreadyVerified(false);
+            setIsExpiredCredential(false);
             setCurrentStep("kyc");
           }
         } catch (e: any) {
@@ -69,6 +81,8 @@ export default function VerifyPage() {
     } else {
       setCurrentStep("connect");
       setIsAlreadyVerified(false);
+      setIsExpiredCredential(false);
+      setExpiresAt(undefined);
       setKycData(null);
       setProofData(null);
       setCommitment(null);
@@ -134,9 +148,6 @@ export default function VerifyPage() {
     setError(null);
 
     try {
-
-
-
       const result = await submitRegistration({
         userAddress: walletAddress,
         proofBytes: proofData.proofBytes,
@@ -148,14 +159,22 @@ export default function VerifyPage() {
 
       setTxHash(result.txHash);
       setIsAlreadyVerified(true);
+      setIsExpiredCredential(false);
+      try {
+        const expiry = await checkSbtExpiration(walletAddress);
+        setExpiresAt(expiry);
+      } catch (ex) {
+        console.error("Failed to fetch sbt expiration post-register:", ex);
+      }
     } catch (e: any) {
       console.error("On-chain Registration Error:", e);
       const errMsg = e.message || "";
       if (errMsg.includes("Error(Contract, #4)") || errMsg.includes("AlreadyVerified")) {
         setIsAlreadyVerified(true);
+        setIsExpiredCredential(false);
         setError(null);
       } else {
-        setError(errMsg || "Failed to register on-chain. Please check Freighter and try again.");
+        setError(errMsg || "Failed to register on-chain. Please check your wallet and try again.");
       }
     } finally {
       setLoading(false);
@@ -169,6 +188,8 @@ export default function VerifyPage() {
     setProofData(null);
     setTxHash(null);
     setIsAlreadyVerified(false);
+    setIsExpiredCredential(false);
+    setExpiresAt(undefined);
     setCurrentStep(walletAddress ? "kyc" : "connect");
   };
 
@@ -326,10 +347,16 @@ export default function VerifyPage() {
               
               <div className="space-y-2">
                 <h3 className="text-xl font-bold tracking-tight text-slate-900 font-instrument">
-                  {isAlreadyVerified ? "Verification Complete!" : "Compliance Proof Generated!"}
+                  {isExpiredCredential
+                    ? "Credential Expired!"
+                    : isAlreadyVerified
+                    ? "Verification Complete!"
+                    : "Compliance Proof Generated!"}
                 </h3>
                 <p className="text-slate-550 text-sm font-clash leading-relaxed">
-                  {isAlreadyVerified
+                  {isExpiredCredential
+                    ? "Your compliance credential has expired. Please renew your verification to restore compliance status."
+                    : isAlreadyVerified
                     ? "Your compliance credential is active and verified on the Stellar ledger. You are fully compliant."
                     : "Your proof is ready. Register it on-chain to activate your compliance token."}
                 </p>
@@ -342,16 +369,29 @@ export default function VerifyPage() {
                   commitment={commitment || undefined}
                   nullifier={nullifier || undefined}
                   oracleSignature={kycData?.oracle_signature}
+                  expiresAt={expiresAt}
                 />
               </div>
 
-              {!isAlreadyVerified && (
+              {isExpiredCredential ? (
                 <button
-                  onClick={handleOnChainRegister}
-                  className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer mt-4"
+                  onClick={handleReset}
+                  className="px-6 py-3 bg-red-650 hover:bg-red-750 text-white text-xs font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer mt-4"
+                  style={{ backgroundColor: "#dc2626" }}
                 >
-                  Register on Stellar Ledger
+                  Renew Verification
                 </button>
+              ) : (
+                <>
+                  {!isAlreadyVerified && (
+                    <button
+                      onClick={handleOnChainRegister}
+                      className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer mt-4"
+                    >
+                      Register on Stellar Ledger
+                    </button>
+                  )}
+                </>
               )}
 
               {txHash && (
@@ -365,12 +405,14 @@ export default function VerifyPage() {
                 </a>
               )}
 
-              <button
-                onClick={handleReset}
-                className="mt-6 px-5 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-full shadow-sm transition duration-200 cursor-pointer"
-              >
-                Reset Flow / Re-verify
-              </button>
+              {!isExpiredCredential && (
+                <button
+                  onClick={handleReset}
+                  className="mt-6 px-5 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-full shadow-sm transition duration-200 cursor-pointer"
+                >
+                  Reset Flow / Re-verify
+                </button>
+              )}
             </div>
           )}
         </div>

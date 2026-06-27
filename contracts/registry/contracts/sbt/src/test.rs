@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{testutils::Address as _, Address, Env, String};
+use soroban_sdk::{testutils::Address as _, testutils::Ledger, Address, Env, String};
 
 #[test]
 fn test_initialize() {
@@ -170,4 +170,44 @@ fn test_multiple_users_mint() {
     client.revoke(&user2);
     assert_eq!(client.balance_of(&user2), 0);
     assert_eq!(client.total_supply(), 2);
+}
+
+#[test]
+fn test_token_expiration_and_renewal() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(SoulboundToken, ());
+    let client = SoulboundTokenClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let user = Address::generate(&env);
+    let name = String::from_str(&env, "Luminar Compliance SBT");
+    let symbol = String::from_str(&env, "LSBT");
+
+    client.initialize(&admin, &name, &symbol);
+
+    // Initial ledger timestamp is 0. Mint at timestamp 0.
+    client.mint(&user);
+    assert_eq!(client.balance_of(&user), 1);
+    assert_eq!(client.expires_at(&user), 31_536_000);
+
+    // Advance time to 365 days exactly. balance_of should return 0 (expired)
+    env.ledger().set(soroban_sdk::testutils::LedgerInfo {
+        timestamp: 31_536_000,
+        protocol_version: 26,
+        sequence_number: 0,
+        network_id: [0u8; 32],
+        base_reserve: 0,
+        min_persistent_entry_ttl: 4096,
+        min_temp_entry_ttl: 16,
+        max_entry_ttl: 6312000,
+    });
+    assert_eq!(client.balance_of(&user), 0);
+
+    // Renewal: Minting should succeed since the previous token has expired.
+    client.mint(&user);
+    // New balance is 1, expiry is extended by 365 days (new expiry is 31,536,000 + 31,536,000 = 63,072,000)
+    assert_eq!(client.balance_of(&user), 1);
+    assert_eq!(client.expires_at(&user), 63_072_000);
 }

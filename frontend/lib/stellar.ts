@@ -78,6 +78,38 @@ export async function checkIsVerified(userAddress: string): Promise<boolean> {
   }
 }
 
+export async function checkSbtExpiration(userAddress: string): Promise<number> {
+  const contractId = process.env.NEXT_PUBLIC_SBT_CONTRACT_ID;
+  if (!contractId) return 0;
+
+  const server = new rpc.Server(TESTNET_RPC_URL);
+  const contract = new Contract(contractId);
+
+  try {
+    const userScVal = nativeToScVal(userAddress, { type: "address" });
+    const mockTx = new TransactionBuilder(
+      new Account("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF", "0"),
+      {
+        fee: "100",
+        networkPassphrase: TESTNET_PASSPHRASE,
+      }
+    )
+      .addOperation(contract.call("expires_at", userScVal))
+      .setTimeout(TimeoutInfinite)
+      .build();
+
+    const sim = await server.simulateTransaction(mockTx);
+    if (rpc.Api.isSimulationSuccess(sim) && sim.result) {
+      const val = sim.result.retval;
+      return Number(scValToNative(val)); // returns BigInt, convert to number
+    }
+    return 0;
+  } catch (e) {
+    console.error("Error checking SBT expiration:", e);
+    return 0;
+  }
+}
+
 export async function submitRegistration(params: RegisterParams): Promise<rpc.Api.GetTransactionResponse> {
   const contractId = process.env.NEXT_PUBLIC_REGISTRY_CONTRACT_ID;
   if (!contractId) throw new Error("Registry contract ID not configured");
