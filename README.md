@@ -9,10 +9,11 @@ Luminar is a premium, high-fidelity, decentralized identity verification (KYC) s
 ## Key Features
 
 *   **Zero-Knowledge Proofs (ZK-SNARKs)**: Powered by **Noir JS** and Aztec's **UltraHonk** proof system in the browser to compute cryptographically secure proofs of age and identification on the client side.
+*   **Multi-Oracle Threshold Consensus**: Features three independent, decentralized oracle signers. The ZK circuit verifies Secp256k1 signatures and asserts a **2-of-3 consensus threshold** to validate proof inputs, eliminating single points of failure.
+*   **Soulbound Compliance Tokens (SBT)**: KYC registration on-chain automatically mints a non-transferable, soulbound compliance token (LSBT) directly to the user's wallet. Revoking a user's verification burns the SBT.
+*   **Stellar Multi-Wallet Kit**: Broader accessibility beyond Freighter. Seamlessly integrates Albedo, Rovo, LOBSTR, and xBull browser extensions and mobile connections.
 *   **Privacy-Preserving Registry**: Registers cryptographic commitments and nullifiers on-chain. No names, document numbers, or dates of birth are ever written to the Stellar ledger.
-*   **Sybil & Double-Spend Protection**: Nullifiers prevent users from registering multiple accounts using the same physical ID card.
-*   **Cryptographically Signed Oracle Credentials**: The Express-based Oracle verifies format validity (with Surepass API integrations) and signs the hashes of KYC data.
-*   **Holographic Credential Card**: A premium, interactive 3D digital ID card in the frontend that flips on-click to reveal ZK commitment hashes and transaction details.
+*   **Sybil & Double-Spend Protection**: Unique Poseidon2 nullifiers prevent users from registering multiple accounts using the same physical ID card.
 
 ---
 
@@ -24,7 +25,10 @@ Luminar is divided into four main folders:
 ├── circuits/          # Noir ZK-SNARK circuit definitions
 ├── contracts/         # Soroban smart contracts (Rust)
 │   ├── verifier/      # Auto-generated UltraHonk proof verifier
-│   └── registry/      # Main KYC registry contract
+│   └── registry/      # Main KYC registry contract and SBT token
+│       └── contracts/
+│           ├── registry/
+│           └── sbt/
 ├── oracle/            # Node/Express server acting as the trusted issuer
 └── frontend/          # Next.js 16 Web application (Turbopack)
 ```
@@ -34,21 +38,24 @@ sequenceDiagram
     autonumber
     actor User as User Wallet
     participant Frontend as Next.js Web App
-    participant Oracle as Express Oracle
+    participant Oracles as Multi-Oracle Node
     participant Contract as Soroban Registry
+    participant SBT as SBT Token Contract
 
-    User->>Frontend: Connect Wallet (Freighter)
+    User->>Frontend: Connect Wallet (Stellar Wallets Kit)
     User->>Frontend: Submit KYC Form (PAN/Aadhaar/Passport)
-    Frontend->>Oracle: Request Attestation (POST /verify)
-    Oracle->>Oracle: Validate format / Verify ID API
-    Oracle-->>Frontend: Return Attestation (Hashes + Signature)
+    Frontend->>Oracles: Request Attestation (POST /verify)
+    Oracles->>Oracles: Verify format / Verify ID API
+    Oracles-->>Frontend: Return Attestations (3 ECDSA Signatures)
     Frontend->>Frontend: Execute Noir Prover (Browser WASM)
-    Frontend-->>Frontend: Generate ZK Proof & Public Inputs
+    Frontend->>Frontend: Verify 2-of-3 threshold & generate ZK Proof
     User->>Frontend: Approve Registration Tx
     Frontend->>Contract: Invoke register(proof, public_inputs, commitment, nullifier)
     Contract->>Contract: Verify Nullifier is unused
-    Contract->>Contract: Cross-contract call to Verifier
-    Contract-->>User: Register & Issue On-chain Credential
+    Contract->>Contract: Call Verifier contract
+    Contract->>SBT: Call mint(user) (Mint Soulbound Token)
+    SBT-->>User: Issue Compliant SBT
+    Contract-->>User: Register & Verify Account
 ```
 
 ---
@@ -87,13 +94,13 @@ Build and test the Soroban contracts.
 cd contracts/verifier/ultrahonk_soroban_contract
 cargo test
 
-# Test the Registry contract
-cd ../registry/contracts/registry
+# Test the Registry and SBT contracts
+cd ../../registry
 cargo test
 ```
 
 #### Contract Deployment
-Deploy the Verifier (with the generated `vk` bytes) and the Registry (initialized to point to the verifier contract):
+Deploy the Verifier (with the generated `vk` bytes), the SBT contract, and the main KYC Registry:
 
 ```bash
 # 1. Deploy Verifier
@@ -102,18 +109,35 @@ stellar contract deploy \
   --source alice --network testnet \
   -- --vk_bytes-file-path circuits/kyc_proof/target/vk
 
-# 2. Deploy Registry
+# 2. Deploy Soulbound Token (SBT)
+stellar contract deploy \
+  --wasm contracts/registry/target/wasm32v1-none/release/luminar_sbt.wasm \
+  --source alice --network testnet
+
+# 3. Deploy KYC Registry
 stellar contract deploy \
   --wasm contracts/registry/target/wasm32v1-none/release/registry.wasm \
   --source alice --network testnet
 
-# 3. Initialize Registry
+# 4. Initialize KYC Registry (linking Verifier and SBT)
 stellar contract invoke \
   --id <REGISTRY_CONTRACT_ID> \
   --source alice --network testnet \
+  --send yes \
   -- initialize \
   --owner <OWNER_ADDRESS> \
-  --verifier_contract <VERIFIER_CONTRACT_ID>
+  --verifier_contract <VERIFIER_CONTRACT_ID> \
+  --sbt_contract <SBT_CONTRACT_ID>
+
+# 5. Initialize SBT (setting Registry as sole authorized admin)
+stellar contract invoke \
+  --id <SBT_CONTRACT_ID> \
+  --source alice --network testnet \
+  --send yes \
+  -- initialize \
+  --admin <REGISTRY_CONTRACT_ID> \
+  --name "Luminar Compliance SBT" \
+  --symbol "LSBT"
 ```
 
 ---
