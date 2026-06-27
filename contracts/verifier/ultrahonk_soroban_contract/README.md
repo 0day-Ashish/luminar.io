@@ -84,7 +84,6 @@ This contract does not enforce access control:
 
 ```bash
 RUST_TEST_THREADS=1 cargo test --test integration_tests -- --nocapture
-cargo test --manifest-path tornado_classic/contracts/Cargo.toml --features testutils -- --nocapture
 ```
 
 ## References

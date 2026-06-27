@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Debug logs
+*.log
+
+# Rust build artifacts (covered per-project but adding root-level catch)
+/target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

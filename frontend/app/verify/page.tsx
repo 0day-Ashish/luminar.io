@@ -134,13 +134,8 @@ export default function VerifyPage() {
     setError(null);
 
     try {
-      console.log("=== ON-CHAIN REGISTRATION DEBUG ===");
-      console.log("Proof bytes length:", proofData.proofBytes.length, "(expected 14592)");
-      console.log("Public inputs bytes length:", proofData.publicInputsBytes.length);
-      console.log("Commitment hex:", commitment);
-      console.log("Nullifier hex:", nullifier);
-      console.log("Min age secs:", kycData.min_age_secs);
-      console.log("=== END DEBUG ===");
+
+
 
       const result = await submitRegistration({
         userAddress: walletAddress,

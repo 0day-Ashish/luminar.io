@@ -130,7 +130,6 @@ export async function generateKycProof(
     min_age_secs: minAgeSecs.toString()
   };
 
-  console.log("Noir Prover Inputs:", inputs);
 
   // 3. Instantiate UltraHonkBackend (creates its own Barretenberg internally) and Noir
   const backend = new UltraHonkBackend(circuit.bytecode);
