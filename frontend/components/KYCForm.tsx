@@ -70,9 +70,10 @@ export default function KYCForm({ onSuccess }: KYCFormProps) {
         oracle3_sig: result.oracle3_sig,
         min_age_secs: MIN_AGE_SECS,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong. Please check your inputs.";
       console.error("KYC Form Error:", err);
-      setError(err.message || "Something went wrong. Please check your inputs.");
+      setError(message);
     } finally {
       setLoading(false);
     }

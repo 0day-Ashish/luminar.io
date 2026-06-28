@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BLOG_POSTS } from "../posts";
@@ -167,7 +166,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="flex items-center gap-2">
             <button className="p-2 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-500 hover:text-black transition cursor-pointer" title="Share Article">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186.002-.003.001-.002a2.5 2.5 0 0 1 2.873-.321m0 0a2.25 2.25 0 1 0 2.506-3.424m-2.506 3.424a2.25 2.25 0 0 0-2.506 3.424m2.506-3.424a2.25 2.25 0 0 0 2.506 3.424M11.25 12h.008v.008H11.25V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.596 5.474.003-.004c.018-.019.043-.03.07-.03.027 0 .052.011.07.03l.003.004a.25.25 0 0 0 .35 0l.003-.004c.018-.019.043-.03.07-.03.027 0 .052.011.07.03l.003.004a.25.25 0 0 0 .35-.35l-.003-.004c-.018-.019-.043-.03-.07-.03a.25.25 0 0 0-.21.11l-.003.004a.25.25 0 0 0-.35 0l-.003-.004a.25.25 0 0 0-.21-.11.25.25 0 0 0-.07.03l-.003.004a.25.25 0 0 0 0 .35Zm.596-10.948a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5" />
               </svg>
             </button>
           </div>

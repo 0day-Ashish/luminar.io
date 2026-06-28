@@ -150,15 +150,8 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   // 3. Simulate to calculate fees and resource limits
   const sim = await server.simulateTransaction(tx);
   if (!rpc.Api.isSimulationSuccess(sim)) {
-    console.error("=== SIMULATION FAILURE DEBUG ===");
-    console.error("Full simulation response:", JSON.stringify(sim, null, 2));
-    if ('error' in sim) {
-      console.error("Simulation error field:", (sim as any).error);
-    }
-    if ('events' in sim) {
-      console.error("Diagnostic events:", JSON.stringify((sim as any).events, null, 2));
-    }
-    throw new Error(`Simulation failed: ${JSON.stringify(sim)}`);
+    const errorDetail = 'error' in sim ? (sim as any).error : JSON.stringify(sim);
+    throw new Error(`Soroban simulation failed: ${errorDetail}`);
   }
 
   // Assemble transaction with simulation results
@@ -173,8 +166,8 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
       address: params.userAddress
     });
     signedTxXdr = res.signedTxXdr;
-  } catch (err: any) {
-    throw new Error(`Wallet signing error: ${err.message || err}`);
+  } catch (err: unknown) {
+    throw new Error(`Wallet signing error: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   const signedTx = new Transaction(signedTxXdr, TESTNET_PASSPHRASE);
