@@ -147,11 +147,24 @@ if (!ORACLE_SECRET_KEY) {
 // ---------------------------------------------------------------------------
 // Multi-Oracle Configuration (ECDSA Secp256k1)
 // ---------------------------------------------------------------------------
-const DEV_KEYS = {
-  oracle1: "0x491995b08484b77ab1a698cd81ede0adc1c4d93871817fce0fcfae0b9602957f",
-  oracle2: "0xc4951af12ab33c456f3b8faa6f900ce6d27bf029b72bb005c9445b58e85c79ce",
-  oracle3: "0x4625bec43221eb74b0817c451cc0587383cb49d2e900b2944322167a489d157a"
+// Oracle private keys MUST be set via environment variables:
+//   ORACLE_1_PRIVATE_KEY, ORACLE_2_PRIVATE_KEY, ORACLE_3_PRIVATE_KEY
+// For local development, set these in a .env file (see .env.example).
+// ---------------------------------------------------------------------------
+
+const ORACLE_KEYS = {
+  oracle1: process.env.ORACLE_1_PRIVATE_KEY,
+  oracle2: process.env.ORACLE_2_PRIVATE_KEY,
+  oracle3: process.env.ORACLE_3_PRIVATE_KEY,
 };
+
+if (!ORACLE_KEYS.oracle1 || !ORACLE_KEYS.oracle2 || !ORACLE_KEYS.oracle3) {
+  console.warn(
+    "WARNING: One or more ORACLE_*_PRIVATE_KEY env vars are missing.\n" +
+    "         Multi-oracle ECDSA signing will fail.\n" +
+    "         Set ORACLE_1_PRIVATE_KEY, ORACLE_2_PRIVATE_KEY, ORACLE_3_PRIVATE_KEY."
+  );
+}
 
 function getEllipticSignature(privateKeyHex, msgHash) {
   const cleanHex = privateKeyHex.startsWith("0x") ? privateKeyHex.slice(2) : privateKeyHex;
@@ -368,7 +381,7 @@ app.post("/verify", async (req, res) => {
     }
 
     // ------------------------------------------------------------------
-    // 7. Sign the payload with HMAC-SHA256
+    // 6. Sign the payload with HMAC-SHA256
     //    doc_type is included so the credential is bound to the
     //    specific document kind that was verified.
     // ------------------------------------------------------------------
@@ -379,7 +392,7 @@ app.post("/verify", async (req, res) => {
       .digest("hex");
 
     // ------------------------------------------------------------------
-    // 8. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
+    // 7. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
     // ------------------------------------------------------------------
     const nameHashBuf = Buffer.from(nameHashHex.slice(2), "hex");
     const idHashBuf = Buffer.from(idHashHex.slice(2), "hex");
@@ -390,12 +403,12 @@ app.post("/verify", async (req, res) => {
     const consensusPayload = Buffer.concat([nameHashBuf, idHashBuf, dobBuf, secretBuf]);
     const consensusHash = crypto.createHash("blake2s256").update(consensusPayload).digest();
 
-    const sig1 = getEllipticSignature(process.env.ORACLE_1_PRIVATE_KEY || DEV_KEYS.oracle1, consensusHash);
-    const sig2 = getEllipticSignature(process.env.ORACLE_2_PRIVATE_KEY || DEV_KEYS.oracle2, consensusHash);
-    const sig3 = getEllipticSignature(process.env.ORACLE_3_PRIVATE_KEY || DEV_KEYS.oracle3, consensusHash);
+    const sig1 = getEllipticSignature(ORACLE_KEYS.oracle1, consensusHash);
+    const sig2 = getEllipticSignature(ORACLE_KEYS.oracle2, consensusHash);
+    const sig3 = getEllipticSignature(ORACLE_KEYS.oracle3, consensusHash);
 
     // ------------------------------------------------------------------
-    // 9. Return the credential payload
+    // 8. Return the credential payload
     // ------------------------------------------------------------------
     return res.json({
       name_hash: nameHashHex,

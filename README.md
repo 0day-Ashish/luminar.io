@@ -179,18 +179,6 @@ Visit [http://localhost:3000](http://localhost:3000) to view the application!
 
 ---
 
-## Automated Integration Verification
-
-We have included a script to test the entire integration flow end-to-end (Oracle attestation -> ZK witness generation -> browser-style UltraHonk proof generation with Keccak -> transaction building/simulation -> testnet submission).
-
-To execute this test:
-```bash
-cd frontend
-node test_onchain.js
-```
-
----
-
 ## Security Specifications
 
 *   **Poseidon2 Hashing**: Standard SNARK-friendly Poseidon2 permutation is used to calculate the ZK commitment hashes, keeping the constraint size low.

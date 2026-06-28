@@ -8,7 +8,6 @@ export interface BlogPost {
   readTime: string;
   featured?: boolean;
   content: string; // Detailed content for the dynamic reader
-  coverImage?: string; // Optional custom cover image path
 }
 
 export const BLOG_POSTS: BlogPost[] = [
@@ -21,7 +20,6 @@ export const BLOG_POSTS: BlogPost[] = [
     author: "Ashish",
     readTime: "6 min read",
     featured: true,
-    coverImage: "/assets/hero.png",
     content: `
       Zero-Knowledge cryptography is transitioning from a theoretical privacy tool to a vital scaling mechanism for decentralized finance. On the Stellar network, the integration of the Soroban smart contract platform offers a highly optimized WebAssembly environment, but executing ZK verifiers (such as Aztec’s UltraHonk) directly on-chain can still be computationally intensive. 
       
@@ -42,7 +40,6 @@ export const BLOG_POSTS: BlogPost[] = [
     date: "June 18, 2026",
     author: "Elena Rostova",
     readTime: "5 min read",
-    coverImage: "/assets/features.jpg",
     content: `
       Traditional financial infrastructure relies on centralized databases storing immense amounts of Personally Identifiable Information (PII) — names, addresses, passport numbers, and social security details. These databases represent prime targets for malicious actors. 
       
@@ -60,7 +57,6 @@ export const BLOG_POSTS: BlogPost[] = [
     date: "June 10, 2026",
     author: "Marcus Vance",
     readTime: "8 min read",
-    coverImage: "/assets/credential-card.jpg",
     content: `
       Stellar's Soroban smart contract platform represents a milestone for on-chain identity logic. With native support for cryptographic signatures, structured state storage, and efficient host functions, Soroban is uniquely positioned to handle complex verification states. 
       
@@ -78,7 +74,6 @@ export const BLOG_POSTS: BlogPost[] = [
     date: "May 29, 2026",
     author: "Ashish",
     readTime: "10 min read",
-    coverImage: "/assets/team.JPG",
     content: `
       Integrating browser-based wallets with zero-knowledge circuits requires bridging two distinct cryptographic environments. In this developer guide, we walk through how Luminar utilizes the Freighter Wallet browser API to obtain a secure signature, which is then used as a private seed within the client-side Noir circuit.
       

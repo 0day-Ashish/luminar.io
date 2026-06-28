@@ -66,8 +66,6 @@ fn main(
     }
 
     let msg_hash = std::hash::blake2s(payload);
-    std::println(payload);
-    std::println(msg_hash);
 
     let verify1 = std::ecdsa_secp256k1::verify_signature(ORACLE1_X, ORACLE1_Y, sig1, msg_hash);
     let verify2 = std::ecdsa_secp256k1::verify_signature(ORACLE2_X, ORACLE2_Y, sig2, msg_hash);

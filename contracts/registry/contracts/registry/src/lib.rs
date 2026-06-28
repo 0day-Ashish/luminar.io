@@ -61,6 +61,9 @@ pub enum Error {
     SbtRevokeFailed = 9,
 }
 
+/// Credential validity period: 365 days in seconds.
+const CREDENTIAL_TTL_SECS: u64 = 31_536_000;
+
 #[contract]
 pub struct RegistryContract;
 
@@ -111,7 +114,7 @@ impl RegistryContract {
             .persistent()
             .get::<_, KYCCredential>(&DataKey::Credential(user.clone()))
         {
-            let expiry_duration = 31_536_000u64;
+            let expiry_duration = CREDENTIAL_TTL_SECS;
             let expired = env.ledger().timestamp() >= existing_cred.issued_at + expiry_duration;
             if !expired && existing_cred.active {
                 return Err(Error::AlreadyVerified);
@@ -182,7 +185,7 @@ impl RegistryContract {
                 if !cred.active {
                     return false;
                 }
-                let expiry_duration = 31_536_000u64;
+                let expiry_duration = CREDENTIAL_TTL_SECS;
                 let expired = env.ledger().timestamp() >= cred.issued_at + expiry_duration;
                 !expired
             })

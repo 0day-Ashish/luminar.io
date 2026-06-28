@@ -12,3 +12,17 @@
 .vscode/
 *.swp
 *.swo
+
+# Environment files (may contain secrets)
+.env
+.env.*
+!.env.example
+
+# Oracle local secrets database
+oracle/local_secrets_db.json
+
+# ZK circuit build artifacts
+circuits/kyc_proof/target/proof
+circuits/kyc_proof/target/proof_fields.json
+circuits/kyc_proof/target/public_inputs
+circuits/kyc_proof/target/public_inputs_fields.json

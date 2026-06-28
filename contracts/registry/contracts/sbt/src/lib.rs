@@ -1,5 +1,4 @@
 #![no_std]
-#![allow(deprecated)]
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, String,
 };
@@ -48,6 +47,9 @@ pub enum Error {
 // ---------------------------------------------------------------------------
 #[contract]
 pub struct SoulboundToken;
+
+/// SBT validity period: 365 days in seconds.
+const SBT_TTL_SECS: u64 = 31_536_000;
 
 #[contractimpl]
 impl SoulboundToken {
@@ -119,9 +121,8 @@ impl SoulboundToken {
             .persistent()
             .set(&DataKey::Balance(to.clone()), &1u64);
 
-        // Set expiry (365 days in seconds: 31,536,000)
-        let expiry_duration = 31_536_000u64;
-        let expires_at = env.ledger().timestamp() + expiry_duration;
+        // Set expiry (365 days)
+        let expires_at = env.ledger().timestamp() + SBT_TTL_SECS;
         env.storage()
             .persistent()
             .set(&DataKey::Expiry(to.clone()), &expires_at);

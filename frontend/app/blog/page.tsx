@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
-import { BLOG_POSTS, BlogPost } from "./posts";
+import { BLOG_POSTS } from "./posts";
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
