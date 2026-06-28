@@ -2,57 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  category: "Engineering" | "Privacy" | "Compliance";
-  description: string;
-  date: string;
-  author: string;
-  readTime: string;
-  featured?: boolean;
-}
-
-const BLOG_POSTS: BlogPost[] = [
-  {
-    id: "scaling-zk-proofs",
-    title: "Scaling Zero-Knowledge Proofs on the Stellar Ledger",
-    category: "Engineering",
-    description: "How we optimize zk-SNARK verifiers in Soroban smart contracts to enable instant compliance verification with minimal gas consumption.",
-    date: "June 24, 2026",
-    author: "Ashish Ranjan",
-    readTime: "6 min read",
-    featured: true,
-  },
-  {
-    id: "zero-pii-future",
-    title: "Why Zero PII Storage is the Future of KYC",
-    category: "Privacy",
-    description: "Exploring the regulatory shift from data accumulation to zero-knowledge verification and how it protects both users and developers.",
-    date: "June 18, 2026",
-    author: "Elena Rostova",
-    readTime: "5 min read",
-  },
-  {
-    id: "soroban-contracts-compliance",
-    title: "Soroban Smart Contracts: A New Era for Stellar Compliance",
-    category: "Compliance",
-    description: "An in-depth look at how Stellar's native smart contract platform enables robust, decentralized identity validation systems.",
-    date: "June 10, 2026",
-    author: "Marcus Vance",
-    readTime: "8 min read",
-  },
-  {
-    id: "freighter-zk-integration",
-    title: "Under the Hood: Integrating Freighter Wallet with ZK Circuits",
-    category: "Engineering",
-    description: "A developer walkthrough of binding private keys to anonymous zero-knowledge commitments using the Freighter browser API.",
-    date: "May 29, 2026",
-    author: "Ashish Ranjan",
-    readTime: "10 min read",
-  },
-];
+import { BLOG_POSTS, BlogPost } from "./posts";
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -67,9 +19,10 @@ export default function BlogPage() {
   const featuredPost = BLOG_POSTS.find((p) => p.featured);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-slate-800 font-clash w-full">
       <title>Luminar Journal & Blog | ZK-Proofs & Stellar compliance</title>
       <meta name="description" content="Explore articles and tutorials on zero-knowledge cryptography, decentralized identity protocols, and on-chain compliance verifiers on Stellar." />
+      
       {/* Blog Header */}
       <div className="max-w-3xl mb-16 space-y-4">
         <span className="text-xs font-bold text-[#2EA37A] uppercase tracking-wider bg-[#2EA37A]/10 px-3 py-1 rounded-full">
@@ -85,7 +38,7 @@ export default function BlogPage() {
       </div>
 
       {/* Category Filter Bar */}
-      <div className="flex flex-wrap items-center gap-2 pb-8 border-b border-slate-300 mb-12">
+      <div className="flex flex-wrap items-center gap-2 pb-8 border-b border-slate-350 mb-12">
         {categories.map((category) => (
           <button
             key={category}
@@ -101,10 +54,13 @@ export default function BlogPage() {
         ))}
       </div>
 
-      {/* Featured Post (Only show if filtering is on "All" or matches category) */}
+      {/* Featured Post */}
       {featuredPost && (selectedCategory === "All" || featuredPost.category === selectedCategory) && (
-        <div className="mb-16">
-          <div className="bg-[#F4F3EF] border border-slate-300 rounded-3xl overflow-hidden shadow-sm flex flex-col lg:flex-row hover:shadow-md transition-shadow duration-300">
+        <div className="mb-16 w-full">
+          <Link 
+            href={`/blog/${featuredPost.id}`}
+            className="w-full bg-[#F4F3EF] border border-slate-300 rounded-3xl overflow-hidden shadow-sm flex flex-col lg:flex-row hover:shadow-md transition-all duration-300 cursor-pointer group block"
+          >
             {/* Left/Top Content */}
             <div className="p-8 md:p-12 lg:w-1/2 flex flex-col justify-between space-y-8">
               <div className="space-y-4">
@@ -117,13 +73,14 @@ export default function BlogPage() {
                     {featuredPost.category}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug font-instrument">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug font-instrument group-hover:text-[#2EA37A] transition-colors duration-250">
                   {featuredPost.title}
                 </h2>
-                <p className="text-sm text-slate-600 leading-relaxed font-clash">
+                <p className="text-sm text-slate-600 leading-relaxed font-clash text-wrap-pretty">
                   {featuredPost.description}
                 </p>
               </div>
+              
               <div className="flex items-center justify-between pt-6 border-t border-slate-200">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#2EA37A] text-white flex items-center justify-center font-bold text-xs font-mono">
@@ -139,37 +96,39 @@ export default function BlogPage() {
                 </span>
               </div>
             </div>
-            {/* Right/Bottom Decorative visual block */}
-            <div className="lg:w-1/2 bg-slate-950 p-8 md:p-12 flex flex-col justify-center relative overflow-hidden min-h-[300px]">
-              <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-[#2EA37A]/20 blur-3xl" />
-              <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-[#2EA37A]/10 blur-3xl" />
+            
+            {/* Right/Bottom Light Theme Visual Block */}
+            <div className="lg:w-1/2 bg-[#F2F0EF] border-t lg:border-t-0 lg:border-l border-slate-300 p-8 md:p-12 flex flex-col justify-center relative overflow-hidden min-h-[300px]">
+              <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-[#2EA37A]/10 blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 rounded-full bg-[#2EA37A]/5 blur-3xl pointer-events-none" />
               
-              <div className="border border-white/10 rounded-2xl p-6 bg-white/5 backdrop-blur-md space-y-4 font-mono relative z-10 max-w-sm mx-auto shadow-inner">
-                <div className="flex items-center justify-between text-xs text-white/50 border-b border-white/10 pb-2">
-                  <span>ZK CIRCUIT COMPILATION</span>
-                  <span className="text-[#2EA37A]">READY</span>
+              <div className="border border-slate-300 rounded-2xl p-6 bg-white/70 backdrop-blur-md space-y-4 font-mono relative z-10 max-w-sm mx-auto shadow-sm w-full">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 border-b border-slate-250 pb-2">
+                  <span className="font-bold text-slate-800">ZK CIRCUIT COMPILATION</span>
+                  <span className="text-emerald-700 font-bold">READY</span>
                 </div>
-                <div className="text-[10px] text-emerald-400 space-y-1 font-mono">
-                  <div>$ npx snarkjs groth16 setup circuits/kyc.r1cs ...</div>
-                  <div>[info] generating proving key... done.</div>
-                  <div>[info] verification key fields written.</div>
-                  <div className="text-white/60 mt-2">// commitment binding public inputs</div>
-                  <div>Public inputs: [ 0x82f...3a9c ]</div>
+                <div className="text-[10px] text-slate-800 space-y-1.5 font-mono overflow-x-auto">
+                  <div className="text-slate-500 whitespace-nowrap">$ npx snarkjs groth16 setup circuits/kyc.r1cs ...</div>
+                  <div className="text-emerald-700 font-semibold whitespace-nowrap">[info] generating proving key... done.</div>
+                  <div className="text-emerald-700 font-semibold whitespace-nowrap">[info] verification key fields written.</div>
+                  <div className="text-slate-400 mt-2">// commitment binding public inputs</div>
+                  <div className="text-slate-700 whitespace-nowrap">Public inputs: <span className="text-[#2EA37A] font-semibold">[ 0x82f...3a9c ]</span></div>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       )}
 
       {/* Blog Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
         {filteredPosts
           .filter((post) => !post.featured || selectedCategory !== "All")
           .map((post) => (
-            <div
+            <Link
               key={post.id}
-              className="bg-[#F4F3EF] border border-slate-300 rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition-all duration-300 hover:-translate-y-1 bg-white/40"
+              href={`/blog/${post.id}`}
+              className="bg-[#F4F3EF] border border-slate-300 rounded-3xl p-6 flex flex-col justify-between hover:shadow-md transition-all duration-300 hover:-translate-y-1 bg-white/40 cursor-pointer group block"
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -179,10 +138,10 @@ export default function BlogPage() {
                   <span className="text-[10px] font-mono text-slate-400">{post.date}</span>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-900 tracking-tight leading-snug line-clamp-2">
+                  <h3 className="text-lg font-bold text-slate-900 tracking-tight leading-snug line-clamp-2 font-instrument group-hover:text-[#2EA37A] transition-colors duration-250">
                     {post.title}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-3 font-clash">
                     {post.description}
                   </p>
                 </div>
@@ -199,7 +158,7 @@ export default function BlogPage() {
                   {post.readTime}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
       </div>
     </div>
