@@ -94,8 +94,14 @@ fn test_kyc_registration_and_revocation() {
 
     // Trying to register a new user with the same nullifier should fail (NullifierUsed)
     let another_user = Address::generate(&env);
-    let err_nullifier = registry_client.try_register(&another_user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
+    let another_commitment = BytesN::from_array(&env, &[1; 32]);
+    let err_nullifier = registry_client.try_register(&another_user, &proof, &public_inputs, &another_commitment, &nullifier, &min_age_secs);
     assert_eq!(err_nullifier, Err(Ok(Error::NullifierUsed)));
+
+    // Trying to register a new user with the same commitment (but different nullifier) should fail (CommitmentUsed)
+    let different_nullifier = BytesN::from_array(&env, &[2; 32]);
+    let err_commitment = registry_client.try_register(&another_user, &proof, &public_inputs, &commitment, &different_nullifier, &min_age_secs);
+    assert_eq!(err_commitment, Err(Ok(Error::CommitmentUsed)));
 
     // Revoke user by owner — this should also burn the SBT
     registry_client.revoke(&user);
@@ -160,6 +166,12 @@ fn test_credential_expiration_and_renewal() {
     assert!(registry_client.is_verified(&user));
     assert_eq!(sbt_client.balance_of(&user), 1);
 
+    // Try to register a different wallet using the same commitment while it is still active (should fail - CommitmentUsed)
+    let another_user = Address::generate(&env);
+    let different_nullifier = BytesN::from_array(&env, &[2; 32]);
+    let err_commitment = registry_client.try_register(&another_user, &proof, &public_inputs, &commitment, &different_nullifier, &min_age_secs);
+    assert_eq!(err_commitment, Err(Ok(Error::CommitmentUsed)));
+
     // Advance time past 365 days (timestamp 31,536,000)
     env.ledger().set(soroban_sdk::testutils::LedgerInfo {
         timestamp: 31_536_000,
@@ -175,7 +187,6 @@ fn test_credential_expiration_and_renewal() {
     assert_eq!(sbt_client.balance_of(&user), 0);
 
     // Try to register a different wallet using the same nullifier (should fail - Sybil protection)
-    let another_user = Address::generate(&env);
     let err_sybil = registry_client.try_register(&another_user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
     assert_eq!(err_sybil, Err(Ok(Error::NullifierUsed)));
 

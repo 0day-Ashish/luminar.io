@@ -34,6 +34,7 @@ pub enum DataKey {
     Owner,
     Credential(Address),
     Nullifier(BytesN<32>),
+    Commitment(BytesN<32>),
 }
 
 #[contracttype]
@@ -60,6 +61,7 @@ pub enum Error {
     SbtMintFailed = 8,
     SbtRevokeFailed = 9,
     InvalidMinAge = 10,
+    CommitmentUsed = 11,
 }
 
 /// Credential validity period: 365 days in seconds.
@@ -133,6 +135,30 @@ impl RegistryContract {
             }
         }
 
+        let commitment_key = DataKey::Commitment(commitment.clone());
+
+        // Prevent commitment reuse by another wallet (Sybil protection for the same identity)
+        if let Some(existing_owner) = env
+            .storage()
+            .persistent()
+            .get::<_, Address>(&commitment_key)
+        {
+            env.storage().persistent().extend_ttl(&commitment_key, 100_000, 500_000);
+            if existing_owner != user {
+                if let Some(existing_cred) = env
+                    .storage()
+                    .persistent()
+                    .get::<_, KYCCredential>(&DataKey::Credential(existing_owner.clone()))
+                {
+                    let expiry_duration = CREDENTIAL_TTL_SECS;
+                    let expired = env.ledger().timestamp() >= existing_cred.issued_at + expiry_duration;
+                    if !expired && existing_cred.active {
+                        return Err(Error::CommitmentUsed);
+                    }
+                }
+            }
+        }
+
         let nullifier_key = DataKey::Nullifier(nullifier.clone());
 
         // Prevent nullifier reuse (double-spend protection)
@@ -167,10 +193,16 @@ impl RegistryContract {
             .set(&nullifier_key, &user);
         env.storage().persistent().extend_ttl(&nullifier_key, 100_000, 500_000);
 
+        // Store/associate the commitment with the user address
+        env.storage()
+            .persistent()
+            .set(&commitment_key, &user);
+        env.storage().persistent().extend_ttl(&commitment_key, 100_000, 500_000);
+
         // Store the credential
         let credential = KYCCredential {
             holder: user.clone(),
-            commitment,
+            commitment: commitment.clone(),
             issued_at: env.ledger().timestamp(),
             min_age_secs,
             active: true,
