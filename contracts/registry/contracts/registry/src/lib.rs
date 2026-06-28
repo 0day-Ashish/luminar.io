@@ -59,6 +59,7 @@ pub enum Error {
     NotVerified = 7,
     SbtMintFailed = 8,
     SbtRevokeFailed = 9,
+    InvalidMinAge = 10,
 }
 
 /// Credential validity period: 365 days in seconds.
@@ -103,17 +104,28 @@ impl RegistryContract {
     ) -> Result<(), Error> {
         user.require_auth();
 
+        // Enforce a strict minimum age requirement of 18 years in seconds (567,648,000)
+        if min_age_secs < 567_648_000 {
+            return Err(Error::InvalidMinAge);
+        }
+
         // Ensure the contract is initialized
         if !env.storage().instance().has(&DataKey::Owner) {
             return Err(Error::NotInitialized);
         }
 
+        // Extend instance storage TTL
+        env.storage().instance().extend_ttl(100_000, 500_000);
+
+        let credential_key = DataKey::Credential(user.clone());
+
         // Allow renewal if expired or inactive
         if let Some(existing_cred) = env
             .storage()
             .persistent()
-            .get::<_, KYCCredential>(&DataKey::Credential(user.clone()))
+            .get::<_, KYCCredential>(&credential_key)
         {
+            env.storage().persistent().extend_ttl(&credential_key, 100_000, 500_000);
             let expiry_duration = CREDENTIAL_TTL_SECS;
             let expired = env.ledger().timestamp() >= existing_cred.issued_at + expiry_duration;
             if !expired && existing_cred.active {
@@ -121,13 +133,16 @@ impl RegistryContract {
             }
         }
 
+        let nullifier_key = DataKey::Nullifier(nullifier.clone());
+
         // Prevent nullifier reuse (double-spend protection)
         // Store the address in the nullifier map to allow self-renewal but prevent other wallets from reusing it
         if let Some(existing_owner) = env
             .storage()
             .persistent()
-            .get::<_, Address>(&DataKey::Nullifier(nullifier.clone()))
+            .get::<_, Address>(&nullifier_key)
         {
+            env.storage().persistent().extend_ttl(&nullifier_key, 100_000, 500_000);
             if existing_owner != user {
                 return Err(Error::NullifierUsed);
             }
@@ -149,7 +164,8 @@ impl RegistryContract {
         // Store/associate the nullifier with the user address
         env.storage()
             .persistent()
-            .set(&DataKey::Nullifier(nullifier), &user);
+            .set(&nullifier_key, &user);
+        env.storage().persistent().extend_ttl(&nullifier_key, 100_000, 500_000);
 
         // Store the credential
         let credential = KYCCredential {
@@ -161,7 +177,8 @@ impl RegistryContract {
         };
         env.storage()
             .persistent()
-            .set(&DataKey::Credential(user.clone()), &credential);
+            .set(&credential_key, &credential);
+        env.storage().persistent().extend_ttl(&credential_key, 100_000, 500_000);
 
         // Mint a Soulbound Compliance Token (SBT) to the user
         if let Some(sbt_address) = env
@@ -178,10 +195,17 @@ impl RegistryContract {
 
     /// Check whether a user has a verified and active KYC credential.
     pub fn is_verified(env: Env, user: Address) -> bool {
+        // Extend instance storage TTL on check
+        if env.storage().instance().has(&DataKey::Owner) {
+            env.storage().instance().extend_ttl(100_000, 500_000);
+        }
+
+        let credential_key = DataKey::Credential(user);
         env.storage()
             .persistent()
-            .get::<_, KYCCredential>(&DataKey::Credential(user))
+            .get::<_, KYCCredential>(&credential_key)
             .map(|cred| {
+                env.storage().persistent().extend_ttl(&credential_key, 100_000, 500_000);
                 if !cred.active {
                     return false;
                 }
@@ -200,17 +224,20 @@ impl RegistryContract {
             .get(&DataKey::Owner)
             .ok_or(Error::NotInitialized)?;
         owner.require_auth();
+        env.storage().instance().extend_ttl(100_000, 500_000);
 
+        let credential_key = DataKey::Credential(user.clone());
         let mut credential: KYCCredential = env
             .storage()
             .persistent()
-            .get(&DataKey::Credential(user.clone()))
+            .get(&credential_key)
             .ok_or(Error::NotVerified)?;
 
         credential.active = false;
         env.storage()
             .persistent()
-            .set(&DataKey::Credential(user.clone()), &credential);
+            .set(&credential_key, &credential);
+        env.storage().persistent().extend_ttl(&credential_key, 100_000, 500_000);
 
         // Burn the Soulbound Token
         if let Some(sbt_address) = env

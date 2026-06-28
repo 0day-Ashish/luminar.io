@@ -26,10 +26,10 @@ export async function POST(req: NextRequest) {
       id: docRef.id,
       message: "Demo request saved to database successfully.",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error saving demo request to Firestore:", error);
     return NextResponse.json(
-      { error: error.message || "Internal Server Error" },
+      { error: "Failed to submit demo request. Please try again later." },
       { status: 500 }
     );
   }

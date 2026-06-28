@@ -178,16 +178,21 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
     throw new Error(`Submit failed: ${JSON.stringify(submitRes)}`);
   }
 
-  // 6. Poll status until confirmation
-  let txResult: rpc.Api.GetTransactionResponse;
+  let txResult: rpc.Api.GetTransactionResponse | undefined;
   
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  let attempts = 0;
+  const maxAttempts = 30; // 30 * 1.5s = 45s max wait time
+  while (attempts < maxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     txResult = await server.getTransaction(submitRes.hash);
     if (txResult.status !== "NOT_FOUND") {
       break;
     }
+    attempts++;
+  }
+
+  if (!txResult || txResult.status === "NOT_FOUND") {
+    throw new Error(`Transaction polling timed out after ${maxAttempts} attempts.`);
   }
 
   if (txResult.status === "SUCCESS") {

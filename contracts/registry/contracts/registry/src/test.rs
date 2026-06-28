@@ -185,3 +185,43 @@ fn test_credential_expiration_and_renewal() {
     assert_eq!(sbt_client.balance_of(&user), 1);
     assert_eq!(sbt_client.expires_at(&user), 63_072_000);
 }
+
+#[test]
+fn test_invalid_minimum_age() {
+    let env = Env::default();
+    env.budget().reset_unlimited();
+
+    let vk_bytes_raw = include_bytes!("../test_artifacts/vk");
+    let proof_bytes_raw = include_bytes!("../test_artifacts/proof");
+    let public_inputs_raw = include_bytes!("../test_artifacts/public_inputs");
+
+    let vk_bytes = Bytes::from_slice(&env, vk_bytes_raw);
+    let proof = Bytes::from_slice(&env, proof_bytes_raw);
+    let public_inputs = Bytes::from_slice(&env, public_inputs_raw);
+
+    let verifier_address = env.register(VERIFIER_WASM, (vk_bytes,));
+    let sbt_address = env.register(SBT_WASM, ());
+    let sbt_client = sbt::Client::new(&env, &sbt_address);
+
+    let registry_address = env.register(RegistryContract, ());
+    let registry_client = RegistryContractClient::new(&env, &registry_address);
+    env.mock_all_auths();
+
+    let sbt_name = String::from_str(&env, "Luminar Compliance SBT");
+    let sbt_symbol = String::from_str(&env, "LSBT");
+    sbt_client.initialize(&registry_address, &sbt_name, &sbt_symbol);
+
+    let owner = Address::generate(&env);
+    registry_client.initialize(&owner, &verifier_address, &sbt_address);
+
+    let user = Address::generate(&env);
+    let commitment = BytesN::from_array(&env, &[0; 32]);
+    let nullifier = BytesN::from_array(&env, &[0; 32]);
+    
+    // min_age_secs set below 18 years (e.g. 17 years in seconds: 17 * 365 * 24 * 3600 = 536,112,000)
+    let min_age_secs = 536112000;
+
+    let err = registry_client.try_register(&user, &proof, &public_inputs, &commitment, &nullifier, &min_age_secs);
+    assert_eq!(err, Err(Ok(Error::InvalidMinAge)));
+}
+

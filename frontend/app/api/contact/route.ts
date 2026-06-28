@@ -29,14 +29,10 @@ export async function POST(req: NextRequest) {
       id: docRef.id,
       message: "Submission saved to database successfully.",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error saving contact submission to Firestore:", error);
-    let errorMessage = error.message || "Internal Server Error";
-    if (error.code === 5 || (error.message && error.message.includes("NOT_FOUND"))) {
-      errorMessage = "Firestore Database '(default)' is not initialized in the Firebase project 'luminar-support'. Please go to the Firebase Console (https://console.firebase.google.com/), select the 'luminar-support' project, and click 'Create Database' under the Firestore Database section.";
-    }
     return NextResponse.json(
-      { error: errorMessage },
+      { error: "Failed to save your message. Please try again later." },
       { status: 500 }
     );
   }

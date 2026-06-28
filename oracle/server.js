@@ -6,6 +6,8 @@ const path = require("path");
 const EC = require("elliptic").ec;
 const ec = new EC("secp256k1");
 const BN = require("bn.js");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const { initializeApp, cert } = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 
@@ -274,8 +276,35 @@ async function verifyWithSurepass(idNumber) {
 // Express app
 // ---------------------------------------------------------------------------
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// Security headers
+app.use(helmet());
+
+// CORS: restrict to allowed origins (comma-separated env var or localhost default)
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",").map(o => o.trim());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. server-to-server, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST"],
+}));
+
+// Body size limit to prevent abuse
+app.use(express.json({ limit: "10kb" }));
+
+// Rate limiting on the verify endpoint (10 requests per 15 minutes per IP)
+const verifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many verification requests. Please try again later." },
+});
 
 // ---- GET /health ----------------------------------------------------------
 app.get("/health", (_req, res) => {
@@ -287,7 +316,7 @@ app.get("/health", (_req, res) => {
 });
 
 // ---- POST /verify ---------------------------------------------------------
-app.post("/verify", async (req, res) => {
+app.post("/verify", verifyLimiter, async (req, res) => {
   try {
     const { name, dob, id_number, country, doc_type } = req.body;
 
@@ -381,18 +410,7 @@ app.post("/verify", async (req, res) => {
     }
 
     // ------------------------------------------------------------------
-    // 6. Sign the payload with HMAC-SHA256
-    //    doc_type is included so the credential is bound to the
-    //    specific document kind that was verified.
-    // ------------------------------------------------------------------
-    const signaturePayload = `${nameHashHex}:${idHashHex}:${secretHex}:${dobTimestamp}:${docTypeLower}`;
-    const oracleSignature = crypto
-      .createHmac("sha256", ORACLE_SECRET_KEY)
-      .update(signaturePayload)
-      .digest("hex");
-
-    // ------------------------------------------------------------------
-    // 7. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
+    // 6. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
     // ------------------------------------------------------------------
     const nameHashBuf = Buffer.from(nameHashHex.slice(2), "hex");
     const idHashBuf = Buffer.from(idHashHex.slice(2), "hex");
@@ -408,7 +426,7 @@ app.post("/verify", async (req, res) => {
     const sig3 = getEllipticSignature(ORACLE_KEYS.oracle3, consensusHash);
 
     // ------------------------------------------------------------------
-    // 8. Return the credential payload
+    // 7. Return the credential payload
     // ------------------------------------------------------------------
     return res.json({
       name_hash: nameHashHex,
@@ -416,7 +434,6 @@ app.post("/verify", async (req, res) => {
       secret: secretHex,
       dob_timestamp: dobTimestamp,
       doc_type: docTypeLower,
-      oracle_signature: oracleSignature, // Legacy HMAC signature
       oracle1_sig: sig1.toString("hex"),
       oracle2_sig: sig2.toString("hex"),
       oracle3_sig: sig3.toString("hex")

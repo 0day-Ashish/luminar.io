@@ -24,7 +24,6 @@ export default function VerifyPage() {
     id_hash: string;
     secret: string;
     dob_timestamp: number;
-    oracle_signature: string;
     min_age_secs: number;
     doc_type?: string;
     oracle1_sig?: string;
@@ -328,7 +327,7 @@ export default function VerifyPage() {
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-[10px] space-y-2 text-slate-600">
                 <p className="truncate"><span className="font-bold text-slate-850">Name Hash:</span> {kycData.name_hash}</p>
                 <p className="truncate"><span className="font-bold text-slate-850">ID Hash:</span> {kycData.id_hash}</p>
-                <p className="truncate"><span className="font-bold text-slate-850">Secret:</span> {kycData.secret}</p>
+                <p className="truncate"><span className="font-bold text-slate-850">Secret:</span> {kycData.secret.slice(0, 8)}••••••••{kycData.secret.slice(-6)}</p>
                 <p className="truncate"><span className="font-bold text-slate-850">Stellar Address:</span> {walletAddress}</p>
               </div>
 
@@ -368,7 +367,7 @@ export default function VerifyPage() {
                   isAlreadyVerified={isAlreadyVerified}
                   commitment={commitment || undefined}
                   nullifier={nullifier || undefined}
-                  oracleSignature={kycData?.oracle_signature}
+
                   expiresAt={expiresAt}
                 />
               </div>

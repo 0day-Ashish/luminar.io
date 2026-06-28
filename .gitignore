@@ -26,3 +26,8 @@ circuits/kyc_proof/target/proof
 circuits/kyc_proof/target/proof_fields.json
 circuits/kyc_proof/target/public_inputs
 circuits/kyc_proof/target/public_inputs_fields.json
+
+# Firebase service account credential
+firebase.json
+frontend/firebase.json
+
