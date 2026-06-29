@@ -312,7 +312,7 @@ export default function VerifyPage() {
 
           {/* Step 3: ZK Proof Generation */}
           {currentStep === "proof" && kycData && (
-            <div className="text-center space-y-6 max-w-md relative z-10">
+            <div className="text-center space-y-6 w-full max-w-md relative z-10 min-w-0">
               <div className="w-16 h-16 rounded-full bg-[#2EA37A]/10 border border-[#2EA37A]/20 flex items-center justify-center text-2xl mx-auto">
                 🔐
               </div>
@@ -324,11 +324,23 @@ export default function VerifyPage() {
               </div>
 
               {/* Hashes details display */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-[10px] space-y-2 text-slate-600">
-                <p className="truncate"><span className="font-bold text-slate-850">Name Hash:</span> {kycData.name_hash}</p>
-                <p className="truncate"><span className="font-bold text-slate-850">ID Hash:</span> {kycData.id_hash}</p>
-                <p className="truncate"><span className="font-bold text-slate-850">Secret:</span> {kycData.secret.slice(0, 8)}••••••••{kycData.secret.slice(-6)}</p>
-                <p className="truncate"><span className="font-bold text-slate-850">Stellar Address:</span> {walletAddress}</p>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-[10px] space-y-2.5 text-slate-600 w-full min-w-0 overflow-hidden">
+                <p className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
+                  <span className="font-bold text-slate-850 shrink-0">Name Hash:</span>
+                  <span className="truncate text-slate-500 sm:text-right block w-full" title={kycData.name_hash}>{kycData.name_hash}</span>
+                </p>
+                <p className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
+                  <span className="font-bold text-slate-850 shrink-0">ID Hash:</span>
+                  <span className="truncate text-slate-500 sm:text-right block w-full" title={kycData.id_hash}>{kycData.id_hash}</span>
+                </p>
+                <p className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
+                  <span className="font-bold text-slate-850 shrink-0">Secret:</span>
+                  <span className="truncate text-slate-500 sm:text-right block w-full">{kycData.secret.slice(0, 8)}••••••••{kycData.secret.slice(-6)}</span>
+                </p>
+                <p className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 w-full min-w-0 overflow-hidden">
+                  <span className="font-bold text-slate-850 shrink-0">Stellar Address:</span>
+                  <span className="truncate text-slate-500 sm:text-right block w-full" title={walletAddress || undefined}>{walletAddress || ""}</span>
+                </p>
               </div>
 
               <button
