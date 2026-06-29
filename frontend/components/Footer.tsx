@@ -53,7 +53,7 @@ export default function Footer() {
           {/* Left: Social Buttons */}
           <div className="flex items-center gap-3">
             <a 
-              href="https://linkedin.com" 
+              href="https://www.linkedin.com/company/luminar-io" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="w-9 h-9 bg-white rounded-lg border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition shadow-sm"

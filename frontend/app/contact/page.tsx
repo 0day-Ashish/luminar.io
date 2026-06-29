@@ -202,8 +202,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">Email Support</div>
-                <a href="mailto:support@luminar.io" className="text-sm font-bold text-slate-900 hover:text-[#2EA37A] transition font-mono">
-                  support@luminar.io
+                <a href="mailto:support@luminar-io.in" className="text-sm font-bold text-slate-900 hover:text-[#2EA37A] transition font-mono">
+                  support@luminar-io.in
                 </a>
               </div>
             </div>

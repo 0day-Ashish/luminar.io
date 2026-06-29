@@ -1028,7 +1028,7 @@ export default function Home() {
                   04 Team
                 </span>
                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-snug tracking-tight font-instrument max-w-md">
-                  Built by people who have worked on decentralized systems, zero-knowledge proofs, and blockchain security at scale. <span className="text-slate-400">Our team comes from Apple, Palantir, and London's leading startups.</span>
+                  Built by people who have worked on decentralized systems, zero-knowledge proofs, and blockchain security at scale. <span className="text-slate-400">Our team comes from RiseIn, Stellar, and other leading web3 communities.</span>
                 </h3>
               </div>
 
