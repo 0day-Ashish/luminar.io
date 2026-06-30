@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://luminar.io",
+    url: "https://luminar-io.in",
     title: "Luminar | Verifiable Zero-Knowledge Identity for Stellar",
     description: "Prove you're KYC-verified on the Stellar network without revealing sensitive personal records. Client-side zero-knowledge proofs and secure oracle signatures.",
     siteName: "Luminar",
