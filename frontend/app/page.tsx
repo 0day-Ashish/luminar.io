@@ -14,6 +14,7 @@ export default function Home() {
   const [demoEmail, setDemoEmail] = useState("");
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSuccess, setDemoSuccess] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1094,6 +1095,82 @@ export default function Home() {
               <span className="text-sm font-bold text-slate-900 font-clash">Red Davis</span>
               <span className="text-xs text-slate-500 font-clash mt-1">Founding Engineer, Clove</span>
             </cite>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="w-full bg-[#F2F0EF] px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-4xl mx-auto py-20 md:py-28 border-b border-slate-300">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight font-instrument">
+              Frequently Asked <span className="font-instrument italic">Questions</span>.
+            </h2>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+              Got questions about zero-knowledge compliance, wallet integrations, or proof generation? Find your answers here.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is Luminar?",
+                a: "Luminar is a decentralized, zero-knowledge identity registry on the Stellar network. It enables users to prove compliance credentials (such as being over 18 years old or matching country residency constraints) to DeFi applications without revealing sensitive personal identifiable information (PII)."
+              },
+              {
+                q: "Do we store your data?",
+                a: "No. Luminar is designed as a privacy-preserving infrastructure. We do not store your physical ID cards, names, or document details. The identity validation checks are processed in memory by the oracles to issue signatures, after which the PII is discarded. The blockchain registry only records cryptographic hashes (commitments and nullifiers) to verify compliance, leaving zero permanent data footprint."
+              },
+              {
+                q: "How does it protect my privacy?",
+                a: "Luminar generates ZK proofs directly in your browser using Aztec's Noir programming language. Your private details (like name, exact date of birth, or document number) never leave your device. Only the cryptographic proof of compliance is submitted to the blockchain."
+              },
+              {
+                q: "What is a Soulbound Compliance Token (LSBT)?",
+                a: "Upon successful verification, Luminar mints a non-transferable Soulbound Token (LSBT) directly to your Stellar wallet. This token acts as a public compliance badge that on-chain DeFi apps can query to authorize your address."
+              },
+              {
+                q: "How are duplicate accounts prevented?",
+                a: "Luminar uses Poseidon2-based nullifiers generated from your unique document secret and wallet address. If you try to register a second wallet using the same physical ID card, the contract detects the duplicate nullifier hash and rejects the transaction, preventing Sybil attacks."
+              },
+              {
+                q: "How does the multi-oracle consensus work?",
+                a: "Three independent, decentralized identity validation oracles review the format and authenticity of the credentials. At least 2 of the 3 oracles must sign the validation payload for the zero-knowledge circuit to allow proof generation, eliminating any single point of trust or failure."
+              }
+            ].map((faq, idx) => {
+              const isOpen = activeFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className="bg-white/40 border border-slate-300 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-sm"
+                >
+                  <button
+                    onClick={() => setActiveFaq(isOpen ? null : idx)}
+                    className="w-full text-left px-6 py-5 sm:px-8 flex justify-between items-center cursor-pointer select-none gap-4"
+                  >
+                    <span className="font-bold text-sm sm:text-base text-slate-800 font-clash">
+                      {faq.q}
+                    </span>
+                    <span
+                      className={`w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold shrink-0 transition-transform duration-300 ${
+                        isOpen ? "rotate-45 text-[#2EA37A]" : ""
+                      }`}
+                    >
+                      +
+                    </span>
+                  </button>
+                  <div
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen ? "max-h-[220px] border-t border-slate-200" : "max-h-0"
+                    }`}
+                  >
+                    <p className="p-6 sm:p-8 text-xs sm:text-sm text-slate-650 leading-relaxed font-instrument">
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
