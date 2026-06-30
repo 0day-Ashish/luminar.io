@@ -258,7 +258,7 @@ export default function Home() {
             <span className="text-base font-clash text-slate-400 uppercase block">
               <span className="font-mono text-xs mr-2">01</span> Solution
             </span>
-            <p className="text-xs md:text-[19px] font-bold text-black leading-relaxed font-clash max-w-lg">
+            <p className="text-sm md:text-[19px] font-bold text-black leading-relaxed font-clash max-w-lg">
               Zero-knowledge compliance proofs that verify regulatory criteria locally, letting users satisfy protocol compliance checks without revealing any underlying personal data.
             </p>
           </div>

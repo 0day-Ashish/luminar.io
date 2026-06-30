@@ -17,6 +17,7 @@ export default function VerifyPage() {
   const [isAlreadyVerified, setIsAlreadyVerified] = useState(false);
   const [expiresAt, setExpiresAt] = useState<number | undefined>(undefined);
   const [isExpiredCredential, setIsExpiredCredential] = useState(false);
+  const [showNoteModal, setShowNoteModal] = useState(false);
   
   // Data from Oracle
   const [kycData, setKycData] = useState<{
@@ -159,6 +160,7 @@ export default function VerifyPage() {
       setTxHash(result.txHash);
       setIsAlreadyVerified(true);
       setIsExpiredCredential(false);
+      setShowNoteModal(true);
       try {
         const expiry = await checkSbtExpiration(walletAddress);
         setExpiresAt(expiry);
@@ -428,6 +430,49 @@ export default function VerifyPage() {
           )}
         </div>
       </div>
+
+      {/* Note Modal */}
+      {showNoteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop with blur */}
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setShowNoteModal(false)}
+          />
+          {/* Modal Box */}
+          <div className="bg-[#F2F0EF] border border-slate-300 rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform transition-all duration-300 scale-100 flex flex-col items-center text-center space-y-6">
+            {/* Badge Icon */}
+            <div className="w-16 h-16 rounded-full bg-[#2EA37A]/10 border border-[#2EA37A]/30 flex items-center justify-center text-[#2EA37A] text-2xl font-bold animate-bounce">
+              ✓
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 font-instrument">
+                Verification Successful
+              </h3>
+              <p className="text-slate-500 text-xs font-mono break-all bg-white/40 border border-slate-200/60 p-2 rounded-xl mt-1 max-w-full">
+                {walletAddress}
+              </p>
+            </div>
+
+            <div className="space-y-4 text-sm text-slate-650 leading-relaxed font-clash">
+              <p>
+                Congratulations! You are now successfully verified. A **Soulbound Compliance Token (LSBT)** has been minted and issued to your wallet address.
+              </p>
+              <p>
+                You can now use this specific Stellar wallet to verify your identity instantly on any of **Luminar's compatible DeFi platforms and compliance anchors** without exposing your personal information.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowNoteModal(false)}
+              className="w-full py-3 bg-[#2EA37A] hover:bg-[#258262] text-white text-sm font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
