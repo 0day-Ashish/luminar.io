@@ -61,6 +61,21 @@ export default function VerifyPage() {
             setIsAlreadyVerified(true);
             setIsExpiredCredential(false);
             setCurrentStep("complete");
+            
+            // Fetch stored credentials from oracle server
+            try {
+              const oracleUrl = process.env.NEXT_PUBLIC_ORACLE_URL || "http://localhost:3001";
+              const res = await fetch(`${oracleUrl}/credentials/${walletAddress}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.commitment && data.nullifier) {
+                  setCommitment(data.commitment);
+                  setNullifier(data.nullifier);
+                }
+              }
+            } catch (ex) {
+              console.error("Failed to load stored credentials:", ex);
+            }
           } else if (expiry > 0 && expiry * 1000 < Date.now()) {
             setIsAlreadyVerified(false);
             setIsExpiredCredential(true);
@@ -161,6 +176,25 @@ export default function VerifyPage() {
       setIsAlreadyVerified(true);
       setIsExpiredCredential(false);
       setShowNoteModal(true);
+
+      // Save credentials to Firebase/local DB
+      try {
+        const oracleUrl = process.env.NEXT_PUBLIC_ORACLE_URL || "http://localhost:3001";
+        await fetch(`${oracleUrl}/credentials`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletAddress,
+            commitment,
+            nullifier,
+          }),
+        });
+      } catch (ex) {
+        console.error("Failed to save credentials to DB:", ex);
+      }
+
       try {
         const expiry = await checkSbtExpiration(walletAddress);
         setExpiresAt(expiry);
@@ -182,7 +216,8 @@ export default function VerifyPage() {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
+    const addr = walletAddress;
     setKycData(null);
     setCommitment(null);
     setNullifier(null);
@@ -191,7 +226,18 @@ export default function VerifyPage() {
     setIsAlreadyVerified(false);
     setIsExpiredCredential(false);
     setExpiresAt(undefined);
-    setCurrentStep(walletAddress ? "kyc" : "connect");
+    setCurrentStep(addr ? "kyc" : "connect");
+
+    if (addr) {
+      try {
+        const oracleUrl = process.env.NEXT_PUBLIC_ORACLE_URL || "http://localhost:3001";
+        await fetch(`${oracleUrl}/credentials/${addr}`, {
+          method: "DELETE",
+        });
+      } catch (ex) {
+        console.error("Failed to clear credentials from DB:", ex);
+      }
+    }
   };
 
   return (

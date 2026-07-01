@@ -126,6 +126,68 @@ async function saveStoredSecret(idHashHex, secretHex) {
   }
 }
 
+async function getStoredCredentials(walletAddress) {
+  if (useLocalDb || !db) {
+    const localDb = readLocalDb();
+    return localDb[walletAddress] || null;
+  }
+
+  try {
+    const docRef = db.collection("user_credentials").doc(walletAddress);
+    const doc = await docRef.get();
+    if (doc.exists) {
+      return doc.data();
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching credentials from Firestore:", err);
+    const localDb = readLocalDb();
+    return localDb[walletAddress] || null;
+  }
+}
+
+async function saveStoredCredentials(walletAddress, commitment, nullifier) {
+  if (useLocalDb || !db) {
+    const localDb = readLocalDb();
+    localDb[walletAddress] = { commitment, nullifier };
+    writeLocalDb(localDb);
+    return;
+  }
+
+  try {
+    const docRef = db.collection("user_credentials").doc(walletAddress);
+    await docRef.set({
+      commitment,
+      nullifier,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Error saving credentials to Firestore:", err);
+    const localDb = readLocalDb();
+    localDb[walletAddress] = { commitment, nullifier };
+    writeLocalDb(localDb);
+  }
+}
+
+async function deleteStoredCredentials(walletAddress) {
+  if (useLocalDb || !db) {
+    const localDb = readLocalDb();
+    delete localDb[walletAddress];
+    writeLocalDb(localDb);
+    return;
+  }
+
+  try {
+    const docRef = db.collection("user_credentials").doc(walletAddress);
+    await docRef.delete();
+  } catch (err) {
+    console.error("Error deleting credentials from Firestore:", err);
+    const localDb = readLocalDb();
+    delete localDb[walletAddress];
+    writeLocalDb(localDb);
+  }
+}
+
 // BN254 (alt_bn128) scalar field prime — all field elements are reduced mod this
 const BN254_PRIME = BigInt(
   "21888242871839275222246405745257275088548364400416034343698204186575808495617"
@@ -445,6 +507,54 @@ app.post("/verify", verifyLimiter, async (req, res) => {
   }
 });
 
+// ---- GET /credentials/:walletAddress -------------------------------------
+app.get("/credentials/:walletAddress", async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    if (!walletAddress) {
+      return res.status(400).json({ error: "Missing walletAddress parameter" });
+    }
+    const creds = await getStoredCredentials(walletAddress);
+    if (!creds) {
+      return res.status(404).json({ error: "Credentials not found" });
+    }
+    return res.json(creds);
+  } catch (err) {
+    console.error("Error in GET /credentials:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ---- POST /credentials ----------------------------------------------------
+app.post("/credentials", async (req, res) => {
+  try {
+    const { walletAddress, commitment, nullifier } = req.body;
+    if (!walletAddress || !commitment || !nullifier) {
+      return res.status(400).json({ error: "Missing required fields: walletAddress, commitment, nullifier" });
+    }
+    await saveStoredCredentials(walletAddress, commitment, nullifier);
+    return res.json({ status: "success" });
+  } catch (err) {
+    console.error("Error in POST /credentials:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ---- DELETE /credentials/:walletAddress ----------------------------------
+app.delete("/credentials/:walletAddress", async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    if (!walletAddress) {
+      return res.status(400).json({ error: "Missing walletAddress parameter" });
+    }
+    await deleteStoredCredentials(walletAddress);
+    return res.json({ status: "success" });
+  } catch (err) {
+    console.error("Error in DELETE /credentials:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Startup
 // ---------------------------------------------------------------------------
@@ -452,4 +562,7 @@ app.listen(PORT, () => {
   console.log(`Luminar Oracle running → http://localhost:${PORT}`);
   console.log(`  POST /verify   — issue KYC hashes + secret`);
   console.log(`  GET  /health   — liveness check`);
+  console.log(`  GET  /credentials/:walletAddress — fetch active user ZK credentials`);
+  console.log(`  POST /credentials — store active user ZK credentials`);
+  console.log(`  DELETE /credentials/:walletAddress — clear user ZK credentials`);
 });
