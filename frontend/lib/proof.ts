@@ -92,6 +92,19 @@ export function signatureHexToBytes(hex: string): number[] {
   return bytes.slice(0, 64);
 }
 
+export interface BenchmarkTimings {
+  wasmInit: number;
+  circuitFetch: number;
+  inputPrep: number;
+  witnessGen: number;
+  proofGen: number;
+  total: number;
+}
+
+export interface ProofGenerationResultWithBenchmark extends ProofGenerationResult {
+  benchmark: BenchmarkTimings;
+}
+
 export async function generateKycProof(
   nameHash: string,
   idHash: string,
@@ -104,15 +117,25 @@ export async function generateKycProof(
   sig1Hex: string,
   sig2Hex: string,
   sig3Hex: string
-): Promise<ProofGenerationResult> {
+): Promise<ProofGenerationResultWithBenchmark> {
+  const totalStart = performance.now();
+
+  // 1. Import WASM modules
+  const wasmStart = performance.now();
   const { Noir } = await import("@noir-lang/noir_js");
   const { UltraHonkBackend } = await import("@aztec/bb.js");
+  const wasmInit = performance.now() - wasmStart;
+  console.log(`⏱ WASM Init: ${wasmInit.toFixed(0)} ms`);
 
-  // 1. Fetch circuit definition
+  // 2. Fetch circuit definition
+  const fetchStart = performance.now();
   const response = await fetch("/circuits/kyc_proof.json");
   const circuit = await response.json();
+  const circuitFetch = performance.now() - fetchStart;
+  console.log(`⏱ Circuit Fetch: ${circuitFetch.toFixed(0)} ms`);
 
-  // 2. Prepare inputs
+  // 3. Prepare inputs
+  const prepStart = performance.now();
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const stellarField = stellarAddressToField(stellarAddress);
   const inputs = {
@@ -129,16 +152,29 @@ export async function generateKycProof(
     current_timestamp: currentTimestamp.toString(),
     min_age_secs: minAgeSecs.toString()
   };
+  const inputPrep = performance.now() - prepStart;
+  console.log(`⏱ Input Prep: ${inputPrep.toFixed(0)} ms`);
 
-
-  // 3. Instantiate UltraHonkBackend (creates its own Barretenberg internally) and Noir
-  const backend = new UltraHonkBackend(circuit.bytecode);
+  // 4. Instantiate UltraHonkBackend with multi-threading (if SharedArrayBuffer is available)
+  const threads = typeof SharedArrayBuffer !== "undefined"
+    ? navigator.hardwareConcurrency || 4
+    : 1;
+  console.log(`🧵 Using ${threads} threads (SharedArrayBuffer: ${typeof SharedArrayBuffer !== "undefined" ? "✓" : "✗"})`);
+  const backend = new UltraHonkBackend(circuit.bytecode, { threads });
   const noir = new Noir(circuit);
 
   try {
-    // 4. Generate witness & proof
+    // 5. Generate witness
+    const witnessStart = performance.now();
     const { witness } = await noir.execute(inputs);
+    const witnessGen = performance.now() - witnessStart;
+    console.log(`⏱ Witness Generation: ${witnessGen.toFixed(0)} ms`);
+
+    // 6. Generate proof
+    const proofStart = performance.now();
     const proofRes = await backend.generateProof(witness, { keccak: true });
+    const proofGen = performance.now() - proofStart;
+    console.log(`⏱ Proof Generation: ${proofGen.toFixed(0)} ms`);
 
     // publicInputs is string[] — convert each hex string field to 32 bytes
     const numInputs = proofRes.publicInputs.length;
@@ -147,9 +183,23 @@ export async function generateKycProof(
       concatenatedInputs.set(hexToBytes(input), index * 32);
     });
 
+    const total = performance.now() - totalStart;
+    console.log(`⏱ TOTAL: ${total.toFixed(0)} ms`);
+    console.log(`📦 Proof size: ${proofRes.proof.length} bytes`);
+
+    const benchmark: BenchmarkTimings = {
+      wasmInit: Math.round(wasmInit),
+      circuitFetch: Math.round(circuitFetch),
+      inputPrep: Math.round(inputPrep),
+      witnessGen: Math.round(witnessGen),
+      proofGen: Math.round(proofGen),
+      total: Math.round(total),
+    };
+
     return {
       proofBytes: proofRes.proof,
-      publicInputsBytes: concatenatedInputs
+      publicInputsBytes: concatenatedInputs,
+      benchmark,
     };
   } finally {
     await backend.destroy();

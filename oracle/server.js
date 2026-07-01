@@ -199,6 +199,7 @@ const BN254_PRIME = BigInt(
 const PORT = process.env.PORT || 3001;
 const ORACLE_SECRET_KEY = process.env.ORACLE_SECRET_KEY;
 const SUREPASS_TOKEN = process.env.SUREPASS_TOKEN;
+const SUREPASS_BASE_URL = process.env.SUREPASS_BASE_URL || "https://sandbox.surepass.app";
 
 if (!ORACLE_SECRET_KEY) {
   console.error(
@@ -316,22 +317,28 @@ function parseDobTimestamp(dob) {
 async function verifyWithSurepass(idNumber) {
   try {
     const response = await fetch(
-      "https://sandbox.surepass.io/api/v1/pan/pan-comprehensive",
+      `${SUREPASS_BASE_URL}/api/v1/pan/pan-comprehensive`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${SUREPASS_TOKEN}`,
         },
-        body: JSON.stringify({ id_number: idNumber }),
+        body: JSON.stringify({
+          id_number: idNumber,
+          masked_aadhaar_variant: "v1, v2, empty"
+        }),
       }
     );
 
     const data = await response.json();
-    return data.data?.valid === true;
+    if (data.success && data.data) {
+      return data.data;
+    }
+    return null;
   } catch (err) {
     console.error("Surepass PAN verification error:", err);
-    return false;
+    return null;
   }
 }
 
@@ -357,7 +364,7 @@ app.use(cors({
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "DELETE"],
 }));
 
 // Body size limit to prevent abuse
@@ -419,10 +426,36 @@ app.post("/verify", verifyLimiter, async (req, res) => {
       // confirm the document actually exists in government records.
       // If SUREPASS_TOKEN is not configured, fall back to format-only validation.
       if (SUREPASS_TOKEN) {
-        const panValid = await verifyWithSurepass(id_number);
-        if (!panValid) {
+        const panData = await verifyWithSurepass(id_number);
+        if (!panData) {
           return res.status(422).json({
             error: "PAN verification failed. Document not found or invalid.",
+          });
+        }
+
+        // 1. Verify Name Matches (robust case-insensitive check, stripping titles/punctuation)
+        const userInputName = name.trim().toUpperCase().replace(/[^A-Z\s]/g, "");
+        const officialName = (panData.full_name || "").trim().toUpperCase().replace(/[^A-Z\s]/g, "");
+        
+        const cleanName = (n) => n.replace(/^(MR|MRS|MS|DR|MISS)\s+/i, "").replace(/\s+/g, " ").trim();
+        const cleanUser = cleanName(userInputName);
+        const cleanOfficial = cleanName(officialName);
+
+        const namesMatch = cleanUser === cleanOfficial || cleanOfficial.includes(cleanUser) || cleanUser.includes(cleanOfficial);
+        
+        if (!namesMatch) {
+          return res.status(422).json({
+            error: `Name mismatch. Provided name "${name}" does not match registered PAN owner name.`,
+          });
+        }
+
+        // 2. Verify Date of Birth Matches (if official DOB is not a placeholder starting with 0001)
+        const userDob = new Date(dob).toISOString().split("T")[0];
+        const officialDob = panData.dob; // expected format: YYYY-MM-DD
+        
+        if (officialDob && !officialDob.startsWith("0001") && userDob !== officialDob) {
+          return res.status(422).json({
+            error: `Date of birth mismatch. Provided DOB "${dob}" does not match registered PAN date of birth.`,
           });
         }
       } else {

@@ -6,7 +6,7 @@ import { useWallet } from "../../context/WalletContext";
 import ProofStep from "../../components/ProofStep";
 import KYCForm from "../../components/KYCForm";
 import CredentialCard from "../../components/CredentialCard";
-import { computeHashes, generateKycProof } from "../../lib/proof";
+import { computeHashes, generateKycProof, BenchmarkTimings } from "../../lib/proof";
 import { checkIsVerified, checkSbtExpiration, submitRegistration } from "../../lib/stellar";
 
 type StepType = "connect" | "kyc" | "proof" | "complete";
@@ -44,7 +44,9 @@ export default function VerifyPage() {
   const [loading, setLoading] = useState(false);
   const [proofLoadingStatus, setProofLoadingStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [benchmarkData, setBenchmarkData] = useState<BenchmarkTimings | null>(null);
 
   // Check verification state when wallet connects
   useEffect(() => {
@@ -147,10 +149,12 @@ export default function VerifyPage() {
       );
 
       setProofData(result);
+      setBenchmarkData(result.benchmark);
       setCurrentStep("complete");
     } catch (e: any) {
       console.error("ZK Proof Generation Error:", e);
       setError(e.message || "Failed to generate ZK proof. Please try again.");
+      setShowErrorModal(true);
     } finally {
       setLoading(false);
       setProofLoadingStatus("");
@@ -210,6 +214,7 @@ export default function VerifyPage() {
         setError(null);
       } else {
         setError(errMsg || "Failed to register on-chain. Please check your wallet and try again.");
+        setShowErrorModal(true);
       }
     } finally {
       setLoading(false);
@@ -432,6 +437,54 @@ export default function VerifyPage() {
                 />
               </div>
 
+              {/* Browser WASM Benchmark Results */}
+              {benchmarkData && (
+                <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">⚡</span>
+                    <h4 className="text-xs font-bold text-slate-800 font-instrument">Browser WASM Benchmark</h4>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    {[
+                      { label: "WASM Init", value: benchmarkData.wasmInit },
+                      { label: "Circuit Fetch", value: benchmarkData.circuitFetch },
+                      { label: "Input Prep", value: benchmarkData.inputPrep },
+                      { label: "Witness Gen", value: benchmarkData.witnessGen },
+                      { label: "Proof Gen", value: benchmarkData.proofGen },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center justify-between text-[11px] font-clash">
+                        <span className="text-slate-500">{item.label}</span>
+                        <div className="flex items-center gap-2 flex-1 mx-3">
+                          <div className="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${Math.min((item.value / benchmarkData.total) * 100, 100)}%`,
+                                backgroundColor: item.label === "Proof Gen" ? "#2EA37A" : "#94a3b8",
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <span className="font-mono font-bold text-slate-700 tabular-nums w-16 text-right">{item.value.toLocaleString()} ms</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-800 font-clash">Total Pipeline</span>
+                    <span className="text-sm font-mono font-bold text-[#2EA37A] tabular-nums">{benchmarkData.total.toLocaleString()} ms</span>
+                  </div>
+
+                  {proofData && (
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                      <span>Proof: {proofData.proofBytes.length.toLocaleString()} bytes</span>
+                      <span>Public Inputs: {proofData.publicInputsBytes.length.toLocaleString()} bytes</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {isExpiredCredential ? (
                 <button
                   onClick={handleReset}
@@ -488,7 +541,7 @@ export default function VerifyPage() {
           {/* Modal Box */}
           <div className="bg-[#F2F0EF] border border-slate-300 rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform transition-all duration-300 scale-100 flex flex-col items-center text-center space-y-6">
             {/* Badge Icon */}
-            <div className="w-16 h-16 rounded-full bg-[#2EA37A]/10 border border-[#2EA37A]/30 flex items-center justify-center text-[#2EA37A] text-2xl font-bold animate-bounce">
+            <div className="w-16 h-16 rounded-full bg-[#2EA37A]/10 border border-[#2EA37A]/30 flex items-center justify-center text-[#2EA37A] text-2xl font-bold">
               ✓
             </div>
             
@@ -503,10 +556,10 @@ export default function VerifyPage() {
 
             <div className="space-y-4 text-sm text-slate-650 leading-relaxed font-clash">
               <p>
-                Congratulations! You are now successfully verified. A **Soulbound Compliance Token (LSBT)** has been minted and issued to your wallet address.
+                Congratulations! You are now successfully verified. A <span className="font-semibold text-slate-800">Soulbound Compliance Token (LSBT)</span> has been minted and issued to your wallet address.
               </p>
               <p>
-                You can now use this specific Stellar wallet to verify your identity instantly on any of **Luminar's compatible DeFi platforms and compliance anchors** without exposing your personal information.
+                You can now use this specific Stellar wallet to verify your identity instantly on any of <span className="font-semibold text-slate-800">Luminar's compatible DeFi platforms and compliance anchors</span> without exposing your personal information.
               </p>
             </div>
 
@@ -515,6 +568,83 @@ export default function VerifyPage() {
               className="w-full py-3 bg-[#2EA37A] hover:bg-[#258262] text-white text-sm font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer"
             >
               Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ZK / Stellar Error Modal */}
+      {showErrorModal && error && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop with blur */}
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => {
+              setShowErrorModal(false);
+              setError(null);
+            }}
+          />
+          {/* Modal Box */}
+          <div className="bg-[#F2F0EF] border border-slate-300 rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform transition-all duration-300 scale-100 flex flex-col items-center text-center space-y-6">
+            {/* Badge Icon */}
+            <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-2xl font-bold animate-pulse">
+              ⚠️
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 font-instrument">
+                Operation Failed
+              </h3>
+              <p className="text-slate-500 text-xs font-semibold bg-rose-50/50 border border-rose-200/60 px-3 py-2 rounded-xl mt-1 max-w-full text-rose-700 font-mono">
+                {error}
+              </p>
+            </div>
+
+            <div className="space-y-4 text-xs text-slate-650 leading-relaxed font-clash text-left w-full">
+              <p className="font-semibold text-slate-800">Possible issues & solutions:</p>
+              <ul className="list-disc pl-5 space-y-2">
+                {error.toLowerCase().includes("proof") || error.toLowerCase().includes("wasm") || error.toLowerCase().includes("circuit") ? (
+                  <>
+                    <li>
+                      <span className="font-bold text-slate-800">WASM Support:</span> Generating ZK proofs requires WebAssembly. Ensure you are using a modern browser (Chrome, Firefox, Safari, Edge) with WASM support active.
+                    </li>
+                    <li>
+                      <span className="font-bold text-slate-800">Device Resources:</span> Local prover computation requires CPU/RAM. Close other heavy browser tabs and ensure your computer isn't in low-power/saving mode.
+                    </li>
+                  </>
+                ) : error.toLowerCase().includes("ledger") || error.toLowerCase().includes("register") || error.toLowerCase().includes("contract") || error.toLowerCase().includes("transaction") || error.toLowerCase().includes("wallet") ? (
+                  <>
+                    <li>
+                      <span className="font-bold text-slate-800">Freighter Network:</span> Ensure your Freighter browser wallet extension is connected and set to the <span className="font-semibold">Testnet</span> network.
+                    </li>
+                    <li>
+                      <span className="font-bold text-slate-800">Missing Faucet Funds:</span> Your Stellar account must be funded to register contracts. Visit the Stellar Friendbot faucet to fund your public address.
+                    </li>
+                    <li>
+                      <span className="font-bold text-slate-800">Approval Denied:</span> You must accept the transaction signature popup in the Freighter extension to finalize registration.
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <span className="font-bold text-slate-800">Wallet Sign-in:</span> Ensure your Stellar Freighter wallet extension is unlocked and signed-in.
+                    </li>
+                    <li>
+                      <span className="font-bold text-slate-800">System Logs:</span> If the issue persists, check the console developer logs (F12) for detailed cryptographic or RPC network error traces.
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowErrorModal(false);
+                setError(null);
+              }}
+              className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-full shadow-sm transition duration-200 cursor-pointer"
+            >
+              Dismiss
             </button>
           </div>
         </div>
