@@ -340,6 +340,9 @@ async function verifyWithSurepass(idNumber) {
 // ---------------------------------------------------------------------------
 const app = express();
 
+// Trust reverse proxy (Render, Cloudflare, etc.) for rate limiter
+app.set("trust proxy", 1);
+
 // Security headers
 app.use(helmet());
 
