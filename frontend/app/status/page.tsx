@@ -3,7 +3,7 @@ import StatusDashboard from "./StatusDashboard";
 
 export const metadata = {
   title: "System Status",
-  description: "Check the live operational status and latency diagnostics for the Luminar zero-knowledge identity verification network and Stellar testnet integration.",
+  description: `Check the live operational status and latency diagnostics for the Luminar zero-knowledge identity verification network and Stellar ${process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "mainnet" : "testnet"} integration.`,
 };
 
 export default function StatusPage() {

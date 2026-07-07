@@ -43,7 +43,10 @@ export default function StatusDashboard() {
     // 3. Stellar Horizon/RPC Node Check
     const stellarStart = performance.now();
     try {
-      const res = await fetch("https://horizon-testnet.stellar.org", {
+      const isMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+      const res = await fetch(
+        isMainnet ? "https://horizon.stellar.org" : "https://horizon-testnet.stellar.org",
+        {
         method: "GET",
         headers: { Accept: "application/json" },
         cache: "no-store",
@@ -190,7 +193,9 @@ export default function StatusDashboard() {
         <div className="bg-[#F4F3EF] border border-slate-300 rounded-3xl p-6 flex flex-col justify-between hover:shadow-sm transition-all duration-200">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg text-slate-900 tracking-tight">Stellar Testnet Node</h3>
+              <h3 className="font-bold text-lg text-slate-900 tracking-tight">
+                Stellar {process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Mainnet" : "Testnet"} Node
+              </h3>
               {getStatusBadge(stellarStatus)}
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -318,9 +323,11 @@ export default function StatusDashboard() {
               <span className="text-slate-300">|</span>
               <span className="text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">RESOLVED</span>
             </div>
-            <h4 className="font-bold text-sm text-slate-900">Stellar Testnet Horizon RPC Congestion</h4>
+            <h4 className="font-bold text-sm text-slate-900">
+              Stellar {process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Mainnet" : "Testnet"} Horizon RPC Congestion
+            </h4>
             <p className="text-xs text-slate-500 leading-relaxed">
-              We observed elevated response latencies from the public Stellar testnet RPC endpoint due to transaction volume spikes. Proving execution remained stable. Service resumed normal operating levels.
+              We observed elevated response latencies from the public Stellar {process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "mainnet" : "testnet"} RPC endpoint due to transaction volume spikes. Proving execution remained stable. Service resumed normal operating levels.
             </p>
           </div>
 

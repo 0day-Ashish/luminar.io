@@ -238,7 +238,9 @@ export default function CredentialCard({
             )}
             <div>
               <span className="block text-[8px] text-[#06241a] uppercase font-semibold opacity-85">Ledger</span>
-              <span className="text-white font-medium">Stellar Testnet</span>
+              <span className="text-white font-medium">
+                {process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Stellar Mainnet" : "Stellar Testnet"}
+              </span>
             </div>
             <div className="flex items-center gap-1 text-white/80 hover:text-white transition duration-150">
               <span>View Cryptographics</span>

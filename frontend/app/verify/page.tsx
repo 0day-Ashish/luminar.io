@@ -508,7 +508,11 @@ export default function VerifyPage() {
 
               {txHash && (
                 <a
-                  href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+                  href={
+                    process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+                      ? `https://stellar.expert/explorer/public/tx/${txHash}`
+                      : `https://stellar.expert/explorer/testnet/tx/${txHash}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-luminar hover:underline font-mono mt-2"
@@ -615,10 +619,10 @@ export default function VerifyPage() {
                 ) : error.toLowerCase().includes("ledger") || error.toLowerCase().includes("register") || error.toLowerCase().includes("contract") || error.toLowerCase().includes("transaction") || error.toLowerCase().includes("wallet") ? (
                   <>
                     <li>
-                      <span className="font-bold text-slate-800">Freighter Network:</span> Ensure your Freighter browser wallet extension is connected and set to the <span className="font-semibold">Testnet</span> network.
+                      <span className="font-bold text-slate-800">Freighter Network:</span> Ensure your Freighter browser wallet extension is connected and set to the <span className="font-semibold">{process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Public" : "Testnet"}</span> network.
                     </li>
                     <li>
-                      <span className="font-bold text-slate-800">Missing Faucet Funds:</span> Your Stellar account must be funded to register contracts. Visit the Stellar Friendbot faucet to fund your public address.
+                      <span className="font-bold text-slate-800">{process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Insufficient Funds" : "Missing Faucet Funds"}:</span> Your Stellar account must be funded with XLM to register. {process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "Ensure your wallet has at least 2 XLM to cover transaction and storage fees." : "Visit the Stellar Friendbot faucet to fund your public address."}
                     </li>
                     <li>
                       <span className="font-bold text-slate-800">Approval Denied:</span> You must accept the transaction signature popup in the Freighter extension to finalize registration.

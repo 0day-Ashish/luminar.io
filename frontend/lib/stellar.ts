@@ -12,8 +12,9 @@ import {
 } from "@stellar/stellar-sdk";
 import { StellarWalletsKit } from "./wallet";
 
-const TESTNET_RPC_URL = "https://soroban-testnet.stellar.org";
-const TESTNET_PASSPHRASE = Networks.TESTNET;
+const IS_MAINNET = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+const TESTNET_RPC_URL = IS_MAINNET ? "https://mainnet.sorobanrpc.com" : "https://soroban-testnet.stellar.org";
+const TESTNET_PASSPHRASE = IS_MAINNET ? Networks.PUBLIC : Networks.TESTNET;
 
 export interface RegisterParams {
   userAddress: string;

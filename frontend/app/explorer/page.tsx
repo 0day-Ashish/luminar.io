@@ -181,7 +181,7 @@ export default function Explorer() {
   return (
     <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 w-full font-clash">
       <title>Luminar Explorer | Live Stellar ZK compliance Activity</title>
-      <meta name="description" content="View live, anonymous zero-knowledge proof generation and on-chain verification metrics on the Stellar testnet ledger." />
+      <meta name="description" content={`View live, anonymous zero-knowledge proof generation and on-chain verification metrics on the Stellar ${process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "mainnet" : "testnet"} ledger.`} />
       {/* Header section */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
