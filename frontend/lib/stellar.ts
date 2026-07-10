@@ -194,7 +194,7 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   let txResult: rpc.Api.GetTransactionResponse | undefined;
   
   let attempts = 0;
-  const maxAttempts = 30; // 30 * 1.5s = 45s max wait time
+  const maxAttempts = 60; // 60 * 1.5s = 90s max wait time
   while (attempts < maxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     txResult = await server.getTransaction(submitRes.hash);

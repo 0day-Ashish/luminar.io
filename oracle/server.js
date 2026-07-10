@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { Keypair } = require("@stellar/stellar-sdk");
-const { BarretenbergSync, Fr } = require("@aztec/bb.js");
+const { BarretenbergSync } = require("@aztec/bb.js");
 
 let barretenbergApi = null;
 let barretenbergInitError = null;
@@ -520,19 +520,16 @@ app.post("/verify", verifyLimiter, async (req, res) => {
       throw new Error("Barretenberg ZK backend is not initialized");
     }
 
-    const nameHashFr = Fr.fromBuffer(Buffer.from(nameHashHex.slice(2), "hex"));
-    const idHashFr = Fr.fromBuffer(Buffer.from(idHashHex.slice(2), "hex"));
+    const nameHashBuf = Buffer.from(nameHashHex.slice(2), "hex");
+    const idHashBuf = Buffer.from(idHashHex.slice(2), "hex");
     const dobHex = dobTimestamp.toString(16).padStart(64, "0");
-    const dobFr = Fr.fromBuffer(Buffer.from(dobHex, "hex"));
-    const secretFr = Fr.fromBuffer(Buffer.from(secretHex.slice(2), "hex"));
+    const dobBuf = Buffer.from(dobHex, "hex");
+    const secretBuf = Buffer.from(secretHex.slice(2), "hex");
 
-    const commRes = barretenbergApi.poseidon2Hash([
-      nameHashFr,
-      idHashFr,
-      dobFr,
-      secretFr
-    ]);
-    const commitmentBytes = commRes.value;
+    const commRes = barretenbergApi.poseidon2Hash({
+      inputs: [nameHashBuf, idHashBuf, dobBuf, secretBuf]
+    });
+    const commitmentBytes = commRes.hash;
     const commitmentHex = "0x" + Array.from(commitmentBytes).map(b => b.toString(16).padStart(2, "0")).join("");
 
     const sig1 = getEd25519Signature(ORACLE_KEYS.oracle1, commitmentBytes);
