@@ -6,6 +6,18 @@ Luminar is a premium, high-fidelity, decentralized identity verification (KYC) s
 
 ---
 
+## Stellar Mainnet Contract Addresses
+
+Luminar is actively deployed on the **Stellar Mainnet**. The registry utilizes a modular architecture linking the verified cryptographic commitments to dynamic Soulbound compliance tokens.
+
+| Contract Name | Contract ID | Explorer Link |
+| :--- | :--- | :--- |
+| **Luminar KYC Registry** | `CAGM5DYHKTAC3OG3HTJCCP4MNLD7EIQR74SLO3E3Q6BGAY4TEEP75M6U` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CAGM5DYHKTAC3OG3HTJCCP4MNLD7EIQR74SLO3E3Q6BGAY4TEEP75M6U) |
+| **ZK UltraHonk Verifier** | `CAF46OFBWDEDEWYPASUEAGM5UNLIVGM5X3TRDKEMBR6HHN363I6T2Z43` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CAF46OFBWDEDEWYPASUEAGM5UNLIVGM5X3TRDKEMBR6HHN363I6T2Z43) |
+| **Luminar Compliance SBT (LSBT)** | `CDMUHTTOS7HHIJAL7XKTTZABQWFW3O5CVAJXJ5RBFYQMLXORMJK4HOSG` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CDMUHTTOS7HHIJAL7XKTTZABQWFW3O5CVAJXJ5RBFYQMLXORMJK4HOSG) |
+
+---
+
 ## Key Features
 
 *   **Zero-Knowledge Proofs (ZK-SNARKs)**: Powered by **Noir JS** and Aztec's **UltraHonk** proof system in the browser to compute cryptographically secure proofs of age and identification on the client side.
@@ -57,6 +69,40 @@ sequenceDiagram
     SBT-->>User: Issue Compliant SBT
     Contract-->>User: Register & Verify Account
 ```
+
+---
+
+## How to Use Your Product
+
+Luminar provides a streamlined, end-to-end web interface for users to verify their identity and obtain on-chain proof of compliance, as well as an explorer to search registered credentials.
+
+### 1. Connecting Your Wallet
+1. Visit the Luminar Web Application.
+2. Click **Connect Wallet** in the top right header.
+3. Select your preferred Stellar wallet from the supported options (Freighter, Albedo, Rovo, LOBSTR, or xBull).
+4. Ensure your wallet is connected to the **Stellar Mainnet** (or Testnet, depending on your configuration) and has a balance of at least 2 XLM to cover transaction and ledger storage fees.
+
+### 2. Submitting Identity Documents
+1. Navigate to the **Verify** portal.
+2. Select your document type (PAN Card, Aadhaar Card, or Passport).
+3. Fill in the required fields (e.g., Name, Document Number, Date of Birth).
+4. Click **Verify Document**.
+5. The system routes the details to the decentralized Multi-Oracle network to check validity and generate cryptographically signed attestations.
+
+### 3. Generating the Zero-Knowledge Proof
+1. Once the Oracle attestations are received, the browser automatically executes Aztec's **Noir/UltraHonk prover** in WASM.
+2. The prover checks that the signatures from 2-of-3 Oracles match the inputs and confirms that you meet the compliance requirements (e.g., age over 18) *locally in your browser*.
+3. This generates a cryptographic proof. Your raw document details and PII *never leave your machine*.
+
+### 4. Registering On-Chain & Minting the SBT
+1. After the ZK proof is computed, a transaction prompt will appear.
+2. Click **Register on Stellar** to approve the transaction.
+3. The Soroban smart contract validates the proof on-chain via the Verifier contract, verifies that the Poseidon2 nullifier has not been used, and registers the commitment.
+4. A **Luminar Soulbound Compliance Token (LSBT)** is automatically minted to your wallet, serving as dynamic, non-transferable proof of verification.
+
+### 5. Exploring and Checking Status
+*   **Explorer**: Search for any Stellar wallet address in the **Explorer** tab to check if they have a valid compliance status or view the details of their minted Soulbound Tokens.
+*   **Diagnostics Dashboard**: Go to the **Status** page to view live latency, operational status of the Oracles, and RPC network congestion metrics.
 
 ---
 
