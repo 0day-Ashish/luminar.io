@@ -448,53 +448,7 @@ export default function VerifyPage() {
                 />
               </div>
 
-              {/* Browser WASM Benchmark Results */}
-              {benchmarkData && (
-                <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">⚡</span>
-                    <h4 className="text-xs font-bold text-slate-800 font-instrument">Browser WASM Benchmark</h4>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    {[
-                      { label: "WASM Init", value: benchmarkData.wasmInit },
-                      { label: "Circuit Fetch", value: benchmarkData.circuitFetch },
-                      { label: "Input Prep", value: benchmarkData.inputPrep },
-                      { label: "Witness Gen", value: benchmarkData.witnessGen },
-                      { label: "Proof Gen", value: benchmarkData.proofGen },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between text-[11px] font-clash">
-                        <span className="text-slate-500">{item.label}</span>
-                        <div className="flex items-center gap-2 flex-1 mx-3">
-                          <div className="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{
-                                width: `${Math.min((item.value / benchmarkData.total) * 100, 100)}%`,
-                                backgroundColor: item.label === "Proof Gen" ? "#2EA37A" : "#94a3b8",
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <span className="font-mono font-bold text-slate-700 tabular-nums w-16 text-right">{item.value.toLocaleString()} ms</span>
-                      </div>
-                    ))}
-                  </div>
 
-                  <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-800 font-clash">Total Pipeline</span>
-                    <span className="text-sm font-mono font-bold text-[#2EA37A] tabular-nums">{benchmarkData.total.toLocaleString()} ms</span>
-                  </div>
-
-                  {proofData && (
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                      <span>Proof: {proofData.proofBytes.length.toLocaleString()} bytes</span>
-                      <span>Public Inputs: {proofData.publicInputsBytes.length.toLocaleString()} bytes</span>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {isExpiredCredential ? (
                 <button
