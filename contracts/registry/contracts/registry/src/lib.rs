@@ -35,6 +35,7 @@ pub enum DataKey {
     Credential(Address),
     Nullifier(BytesN<32>),
     Commitment(BytesN<32>),
+    Oracles,
 }
 
 #[contracttype]
@@ -62,6 +63,7 @@ pub enum Error {
     SbtRevokeFailed = 9,
     InvalidMinAge = 10,
     CommitmentUsed = 11,
+    InvalidOracles = 12,
 }
 
 /// Credential validity period: 365 days in seconds.
@@ -78,6 +80,9 @@ impl RegistryContract {
         owner: Address,
         verifier_contract: Address,
         sbt_contract: Address,
+        oracle1: BytesN<32>,
+        oracle2: BytesN<32>,
+        oracle3: BytesN<32>,
     ) -> Result<(), Error> {
         if env.storage().instance().has(&DataKey::Owner) {
             return Err(Error::AlreadyInitialized);
@@ -91,6 +96,13 @@ impl RegistryContract {
         env.storage()
             .instance()
             .set(&DataKey::SbtContract, &sbt_contract);
+
+        let mut oracles = soroban_sdk::vec![&env];
+        oracles.push_back(oracle1);
+        oracles.push_back(oracle2);
+        oracles.push_back(oracle3);
+        env.storage().instance().set(&DataKey::Oracles, &oracles);
+
         Ok(())
     }
 
@@ -103,6 +115,10 @@ impl RegistryContract {
         commitment: BytesN<32>,
         nullifier: BytesN<32>,
         min_age_secs: u64,
+        oracle_idx_a: u32,
+        sig_a: BytesN<64>,
+        oracle_idx_b: u32,
+        sig_b: BytesN<64>,
     ) -> Result<(), Error> {
         user.require_auth();
 
@@ -115,6 +131,33 @@ impl RegistryContract {
         if !env.storage().instance().has(&DataKey::Owner) {
             return Err(Error::NotInitialized);
         }
+
+        // Verify oracle threshold consensus
+        if oracle_idx_a == oracle_idx_b {
+            return Err(Error::InvalidOracles);
+        }
+        if oracle_idx_a >= 3 || oracle_idx_b >= 3 {
+            return Err(Error::InvalidOracles);
+        }
+
+        let oracles: soroban_sdk::Vec<BytesN<32>> = env
+            .storage()
+            .instance()
+            .get(&DataKey::Oracles)
+            .ok_or(Error::NotInitialized)?;
+
+        let oracle_a = oracles.get(oracle_idx_a).ok_or(Error::InvalidOracles)?;
+        let oracle_b = oracles.get(oracle_idx_b).ok_or(Error::InvalidOracles)?;
+
+        // The message being signed is the 32-byte commitment
+        let msg_bytes = Bytes::from(commitment.clone());
+
+        // Verify signature A
+        env.crypto().ed25519_verify(&oracle_a, &msg_bytes, &sig_a);
+
+        // Verify signature B
+        env.crypto().ed25519_verify(&oracle_b, &msg_bytes, &sig_b);
+
 
         // Extend instance storage TTL
         env.storage().instance().extend_ttl(100_000, 500_000);

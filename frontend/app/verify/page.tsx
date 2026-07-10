@@ -7,7 +7,7 @@ import ProofStep from "../../components/ProofStep";
 import KYCForm from "../../components/KYCForm";
 import CredentialCard from "../../components/CredentialCard";
 import { computeHashes, generateKycProof, BenchmarkTimings } from "../../lib/proof";
-import { checkIsVerified, checkSbtExpiration, submitRegistration } from "../../lib/stellar";
+import { checkIsVerified, checkSbtExpiration, submitRegistration, hexToBytes } from "../../lib/stellar";
 
 type StepType = "connect" | "kyc" | "proof" | "complete";
 
@@ -142,10 +142,7 @@ export default function VerifyPage() {
         walletAddress,
         hashes.commitment,
         hashes.nullifier,
-        kycData.min_age_secs,
-        kycData.oracle1_sig || "",
-        kycData.oracle2_sig || "",
-        kycData.oracle3_sig || ""
+        kycData.min_age_secs
       );
 
       setProofData(result);
@@ -167,6 +164,16 @@ export default function VerifyPage() {
     setError(null);
 
     try {
+      // Extract exactly 2 available oracle signatures
+      const sigs = [];
+      if (kycData.oracle1_sig) sigs.push({ idx: 0, hex: kycData.oracle1_sig });
+      if (kycData.oracle2_sig) sigs.push({ idx: 1, hex: kycData.oracle2_sig });
+      if (kycData.oracle3_sig) sigs.push({ idx: 2, hex: kycData.oracle3_sig });
+
+      if (sigs.length < 2) {
+        throw new Error("Insufficient oracle signatures. Need at least 2.");
+      }
+
       const result = await submitRegistration({
         userAddress: walletAddress,
         proofBytes: proofData.proofBytes,
@@ -174,6 +181,10 @@ export default function VerifyPage() {
         commitmentHex: commitment,
         nullifierHex: nullifier,
         minAgeSecs: kycData.min_age_secs,
+        oracleIdxA: sigs[0].idx,
+        sigABytes: hexToBytes(sigs[0].hex),
+        oracleIdxB: sigs[1].idx,
+        sigBBytes: hexToBytes(sigs[1].hex),
       });
 
       setTxHash(result.txHash);

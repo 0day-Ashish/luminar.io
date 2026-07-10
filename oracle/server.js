@@ -4,9 +4,20 @@ const cors = require("cors");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const EC = require("elliptic").ec;
-const ec = new EC("secp256k1");
-const BN = require("bn.js");
+const { Keypair } = require("@stellar/stellar-sdk");
+const { BarretenbergSync, Fr } = require("@aztec/bb.js");
+
+let barretenbergApi = null;
+async function initBarretenberg() {
+  try {
+    await BarretenbergSync.initSingleton();
+    barretenbergApi = BarretenbergSync.getSingleton();
+    console.log("Oracle: Barretenberg ZK backend successfully initialized.");
+  } catch (e) {
+    console.error("Oracle: Failed to initialize Barretenberg ZK backend:", e);
+  }
+}
+initBarretenberg();
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const { initializeApp, cert } = require("firebase-admin");
@@ -232,20 +243,11 @@ if (!ORACLE_KEYS.oracle1 || !ORACLE_KEYS.oracle2 || !ORACLE_KEYS.oracle3) {
   );
 }
 
-function getEllipticSignature(privateKeyHex, msgHash) {
+function getEd25519Signature(privateKeyHex, commitmentBytes) {
   const cleanHex = privateKeyHex.startsWith("0x") ? privateKeyHex.slice(2) : privateKeyHex;
-  const key = ec.keyFromPrivate(cleanHex, "hex");
-  const sigObj = key.sign(msgHash);
-  
-  let s = sigObj.s;
-  const halfOrder = ec.curve.n.ushrn(1);
-  if (s.gt(halfOrder)) {
-    s = ec.curve.n.sub(s);
-  }
-  
-  const rBytes = sigObj.r.toArrayLike(Buffer, "be", 32);
-  const sBytes = s.toArrayLike(Buffer, "be", 32);
-  return Buffer.concat([rBytes, sBytes]);
+  const rawSeed = Buffer.from(cleanHex, "hex");
+  const keypair = Keypair.fromRawEd25519Seed(rawSeed);
+  return keypair.sign(commitmentBytes);
 }
 
 if (!SUREPASS_TOKEN) {
@@ -509,20 +511,30 @@ app.post("/verify", verifyLimiter, async (req, res) => {
     }
 
     // ------------------------------------------------------------------
-    // 6. Sign with Multi-Oracle Keys using Blake2s payload for ZK threshold
+    // 6. Compute Poseidon2 Commitment and Sign with Ed25519 Keys
     // ------------------------------------------------------------------
-    const nameHashBuf = Buffer.from(nameHashHex.slice(2), "hex");
-    const idHashBuf = Buffer.from(idHashHex.slice(2), "hex");
-    const dobBuf = Buffer.alloc(8);
-    dobBuf.writeBigUInt64BE(BigInt(dobTimestamp));
-    const secretBuf = Buffer.from(secretHex.slice(2), "hex");
+    if (!barretenbergApi) {
+      throw new Error("Barretenberg ZK backend is not initialized");
+    }
 
-    const consensusPayload = Buffer.concat([nameHashBuf, idHashBuf, dobBuf, secretBuf]);
-    const consensusHash = crypto.createHash("blake2s256").update(consensusPayload).digest();
+    const nameHashFr = Fr.fromBuffer(Buffer.from(nameHashHex.slice(2), "hex"));
+    const idHashFr = Fr.fromBuffer(Buffer.from(idHashHex.slice(2), "hex"));
+    const dobHex = dobTimestamp.toString(16).padStart(64, "0");
+    const dobFr = Fr.fromBuffer(Buffer.from(dobHex, "hex"));
+    const secretFr = Fr.fromBuffer(Buffer.from(secretHex.slice(2), "hex"));
 
-    const sig1 = getEllipticSignature(ORACLE_KEYS.oracle1, consensusHash);
-    const sig2 = getEllipticSignature(ORACLE_KEYS.oracle2, consensusHash);
-    const sig3 = getEllipticSignature(ORACLE_KEYS.oracle3, consensusHash);
+    const commRes = barretenbergApi.poseidon2Hash([
+      nameHashFr,
+      idHashFr,
+      dobFr,
+      secretFr
+    ]);
+    const commitmentBytes = commRes.value;
+    const commitmentHex = "0x" + Array.from(commitmentBytes).map(b => b.toString(16).padStart(2, "0")).join("");
+
+    const sig1 = getEd25519Signature(ORACLE_KEYS.oracle1, commitmentBytes);
+    const sig2 = getEd25519Signature(ORACLE_KEYS.oracle2, commitmentBytes);
+    const sig3 = getEd25519Signature(ORACLE_KEYS.oracle3, commitmentBytes);
 
     // ------------------------------------------------------------------
     // 7. Return the credential payload
@@ -533,6 +545,7 @@ app.post("/verify", verifyLimiter, async (req, res) => {
       secret: secretHex,
       dob_timestamp: dobTimestamp,
       doc_type: docTypeLower,
+      commitment: commitmentHex,
       oracle1_sig: sig1.toString("hex"),
       oracle2_sig: sig2.toString("hex"),
       oracle3_sig: sig3.toString("hex")

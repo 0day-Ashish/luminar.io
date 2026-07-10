@@ -23,6 +23,10 @@ export interface RegisterParams {
   commitmentHex: string;
   nullifierHex: string;
   minAgeSecs: number;
+  oracleIdxA: number;
+  sigABytes: Uint8Array;
+  oracleIdxB: number;
+  sigBBytes: Uint8Array;
 }
 
 export function hexToBytes(hex: string): Uint8Array {
@@ -128,6 +132,10 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
   const commitmentScVal = xdr.ScVal.scvBytes(Buffer.from(hexToBytes32(params.commitmentHex)));
   const nullifierScVal = xdr.ScVal.scvBytes(Buffer.from(hexToBytes32(params.nullifierHex)));
   const minAgeScVal = nativeToScVal(BigInt(params.minAgeSecs), { type: "u64" });
+  const oracleIdxAScVal = nativeToScVal(params.oracleIdxA, { type: "u32" });
+  const sigAScVal = nativeToScVal(params.sigABytes, { type: "bytes" });
+  const oracleIdxBScVal = nativeToScVal(params.oracleIdxB, { type: "u32" });
+  const sigBScVal = nativeToScVal(params.sigBBytes, { type: "bytes" });
 
   // 2. Build the transaction structure
   const tx = new TransactionBuilder(account, {
@@ -142,7 +150,11 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
         publicInputsScVal,
         commitmentScVal,
         nullifierScVal,
-        minAgeScVal
+        minAgeScVal,
+        oracleIdxAScVal,
+        sigAScVal,
+        oracleIdxBScVal,
+        sigBScVal
       )
     )
     .setTimeout(TimeoutInfinite)

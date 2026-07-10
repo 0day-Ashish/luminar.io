@@ -113,10 +113,7 @@ export async function generateKycProof(
   stellarAddress: string,
   commitment: string,
   nullifier: string,
-  minAgeSecs: number,
-  sig1Hex: string,
-  sig2Hex: string,
-  sig3Hex: string
+  minAgeSecs: number
 ): Promise<ProofGenerationResultWithBenchmark> {
   const totalStart = performance.now();
 
@@ -143,9 +140,6 @@ export async function generateKycProof(
     id_hash: padTo32BytesHex(idHash),
     dob_timestamp: dobTimestamp.toString(),
     secret: padTo32BytesHex(secret),
-    sig1: signatureHexToBytes(sig1Hex),
-    sig2: signatureHexToBytes(sig2Hex),
-    sig3: signatureHexToBytes(sig3Hex),
     commitment: padTo32BytesHex(commitment),
     nullifier: padTo32BytesHex(nullifier),
     stellar_address: stellarField,

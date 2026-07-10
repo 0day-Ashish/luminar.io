@@ -1135,6 +1135,8 @@ dependencies = [
 name = "registry"
 version = "0.0.0"
 dependencies = [
+ "ed25519-dalek",
+ "rand",
  "soroban-sdk",
 ]
 
