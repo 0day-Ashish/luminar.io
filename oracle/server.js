@@ -8,16 +8,17 @@ const { Keypair } = require("@stellar/stellar-sdk");
 const { BarretenbergSync, Fr } = require("@aztec/bb.js");
 
 let barretenbergApi = null;
+let barretenbergInitError = null;
 async function initBarretenberg() {
   try {
     await BarretenbergSync.initSingleton();
     barretenbergApi = BarretenbergSync.getSingleton();
     console.log("Oracle: Barretenberg ZK backend successfully initialized.");
   } catch (e) {
+    barretenbergInitError = e.message || String(e);
     console.error("Oracle: Failed to initialize Barretenberg ZK backend:", e);
   }
 }
-initBarretenberg();
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const { initializeApp, cert } = require("firebase-admin");
@@ -387,6 +388,8 @@ app.get("/health", (_req, res) => {
     status: "ok",
     service: "luminar-oracle",
     timestamp: new Date().toISOString(),
+    bb_initialized: barretenbergApi !== null,
+    bb_init_error: barretenbergInitError,
   });
 });
 
@@ -552,7 +555,7 @@ app.post("/verify", verifyLimiter, async (req, res) => {
     });
   } catch (err) {
     console.error("Error in POST /verify:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: err.message || String(err) });
   }
 });
 
@@ -607,11 +610,15 @@ app.delete("/credentials/:walletAddress", async (req, res) => {
 // ---------------------------------------------------------------------------
 // Startup
 // ---------------------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`Luminar Oracle running → http://localhost:${PORT}`);
-  console.log(`  POST /verify   — issue KYC hashes + secret`);
-  console.log(`  GET  /health   — liveness check`);
-  console.log(`  GET  /credentials/:walletAddress — fetch active user ZK credentials`);
-  console.log(`  POST /credentials — store active user ZK credentials`);
-  console.log(`  DELETE /credentials/:walletAddress — clear user ZK credentials`);
-});
+async function start() {
+  await initBarretenberg();
+  app.listen(PORT, () => {
+    console.log(`Luminar Oracle running → http://localhost:${PORT}`);
+    console.log(`  POST /verify   — issue KYC hashes + secret`);
+    console.log(`  GET  /health   — liveness check`);
+    console.log(`  GET  /credentials/:walletAddress — fetch active user ZK credentials`);
+    console.log(`  POST /credentials — store active user ZK credentials`);
+    console.log(`  DELETE /credentials/:walletAddress — clear user ZK credentials`);
+  });
+}
+start();
