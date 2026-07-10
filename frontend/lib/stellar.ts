@@ -139,7 +139,7 @@ export async function submitRegistration(params: RegisterParams): Promise<rpc.Ap
 
   // 2. Build the transaction structure
   const tx = new TransactionBuilder(account, {
-    fee: "100", // Will be updated by simulation
+    fee: "100000", // 100k stroops inclusion fee buffer for mainnet congestion
     networkPassphrase: TESTNET_PASSPHRASE,
   })
     .addOperation(
