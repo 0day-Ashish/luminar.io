@@ -72,7 +72,7 @@ sequenceDiagram
 
 ---
 
-## How to Use Your Product
+## How to Use Luminar
 
 Luminar provides a streamlined, end-to-end web interface for users to verify their identity and obtain on-chain proof of compliance, as well as an explorer to search registered credentials.
 
