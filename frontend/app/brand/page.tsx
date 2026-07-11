@@ -162,42 +162,6 @@ export default function BrandAssetsPage() {
               </div>
             </div>
 
-            {/* Neko.js Interactive Mascot Card */}
-            <div className="border border-slate-300 rounded-2xl bg-white p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition duration-300 relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-[6px] bg-[#2EA37A]" />
-              <div>
-                <h3 className="text-lg font-bold text-slate-950 mb-2">Neko.js Interactive Mascot</h3>
-                <p className="text-xs text-slate-500 mb-6">Easter-egg mouse chasing cat active globally across layout templates.</p>
-                <div className="h-40 bg-[#F2F0EF] rounded-xl flex flex-col items-center justify-center border border-slate-200 p-4 mb-6 select-none">
-                  <Image 
-                    src="/assets/neko.ico" 
-                    alt="Neko Mascot Icon" 
-                    width={48} 
-                    height={48} 
-                    className="w-12 h-12 object-contain mb-2 pointer-events-none"
-                  />
-                  <span className="text-[10px] font-mono text-slate-400 tracking-wider">neko.js active</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <a 
-                  href="https://github.com/louisabraham/nekojs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-grow py-2.5 px-3 border border-slate-350 hover:border-slate-400 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-bold font-mono tracking-wider text-center flex items-center justify-center gap-1.5 transition"
-                >
-                  GITHUB REPO
-                </a>
-                <button
-                  onClick={() => triggerCopy("https://louisabraham.github.io/nekojs/neko.js", "neko-js-link")}
-                  className="py-2.5 px-3 border border-slate-350 hover:border-slate-400 text-slate-800 hover:bg-slate-50 rounded-lg text-xs font-bold font-mono tracking-wider flex items-center justify-center gap-1.5 transition shrink-0"
-                  title="Copy script URL"
-                >
-                  {copiedId === "neko-js-link" ? <CheckIcon /> : <CopyIcon />}
-                </button>
-              </div>
-            </div>
-
           </div>
         </section>
 
