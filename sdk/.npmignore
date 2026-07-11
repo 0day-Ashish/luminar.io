@@ -1,0 +1,10 @@
+src/
+tsconfig.json
+tsconfig.cjs.json
+tsconfig.esm.json
+.npmignore
+__tests__/
+example/
+node_modules/
+dist/esm/*.tsbuildinfo
+dist/cjs/*.tsbuildinfo
