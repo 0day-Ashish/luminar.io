@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CredentialCard from "../components/CredentialCard";
+import { checkIsVerified } from "../lib/stellar";
 
 export default function Home() {
   const expandCardRef = useRef<HTMLDivElement>(null);
@@ -15,6 +16,29 @@ export default function Home() {
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const [demoSuccess, setDemoSuccess] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  const [searchAddress, setSearchAddress] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkResult, setCheckResult] = useState<boolean | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleCheckKyc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchAddress.trim()) return;
+    
+    setIsChecking(true);
+    setHasSearched(true);
+    setCheckResult(null);
+
+    try {
+      const verified = await checkIsVerified(searchAddress.trim());
+      setCheckResult(verified);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,21 +194,68 @@ export default function Home() {
           before your users transact
         </h1>
 
-        {/* Input Bar Section matching Luminar's email input exactly */}
-        <div className="max-w-md w-full mb-10">
-          <div className="flex items-center bg-slate-50 border border-slate-300 rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
+        {/* Check KYC Status Input Bar */}
+        <div className="max-w-md w-full mb-10 space-y-3">
+          <form onSubmit={handleCheckKyc} className="flex items-center bg-white border border-slate-350 rounded-full p-1.5 focus-within:ring-2 focus-within:ring-slate-950 focus-within:border-transparent transition-all duration-200 shadow-sm">
             <input
               type="text"
-              placeholder="Enter your Stellar public key or email"
-              className="flex-grow bg-transparent px-4 py-2 text-sm text-slate-850 placeholder-slate-400 focus:outline-none"
+              placeholder="Enter Stellar address (G...)"
+              value={searchAddress}
+              onChange={(e) => {
+                setSearchAddress(e.target.value);
+                if (hasSearched) setHasSearched(false);
+              }}
+              className="flex-grow bg-transparent px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none"
+              disabled={isChecking}
             />
-            <Link
-              href="/verify"
-              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0"
+            <button
+              type="submit"
+              disabled={isChecking || !searchAddress.trim()}
+              className="px-6 py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-full transition duration-200 shadow-sm shrink-0 flex items-center gap-1.5"
             >
-              Pre-Register
-            </Link>
-          </div>
+              {isChecking ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Checking...
+                </>
+              ) : (
+                "Check KYC Status"
+              )}
+            </button>
+          </form>
+
+          {/* Results Display */}
+          {hasSearched && !isChecking && checkResult !== null && (
+            <div className={`p-4 rounded-2xl border text-xs leading-normal animate-in fade-in slide-in-from-top-2 duration-300 flex items-start gap-2.5 ${
+              checkResult 
+                ? "bg-emerald-50 border-emerald-200 text-emerald-800" 
+                : "bg-amber-50 border-amber-200 text-amber-800"
+            }`}>
+              {checkResult ? (
+                <>
+                  <span className="text-emerald-700 text-sm font-extrabold shrink-0 mt-0.5">✓</span>
+                  <div>
+                    <p className="font-bold text-emerald-950">Address is Compliant</p>
+                    <p className="text-emerald-700 mt-0.5">This wallet address holds a valid, active Soulbound Compliance Token (LSBT) on the Stellar ledger.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="text-amber-700 text-sm font-extrabold shrink-0 mt-0.5">✗</span>
+                  <div className="flex-grow">
+                    <p className="font-bold text-amber-950">Address Not Verified</p>
+                    <p className="text-amber-700 mt-0.5">No compliance token was found for this address.</p>
+                    <Link href="/verify" className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-amber-900 hover:text-amber-950 transition">
+                      Get Verified Now →
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Client Logos Monochromatic Row */}
@@ -652,10 +723,10 @@ export default function Home() {
                   className="absolute left-0 top-0 h-full bg-[#2EA37A] transition-all duration-500 ease-out"
                   style={{
                     width: `${activeDebugTab === "audio" ? "16.6%" :
-                        activeDebugTab === "timeline" ? "33.3%" :
-                          activeDebugTab === "logs" ? "50%" :
-                            activeDebugTab === "network" ? "66.6%" :
-                              activeDebugTab === "analysis" ? "83.3%" : "100%"
+                      activeDebugTab === "timeline" ? "33.3%" :
+                        activeDebugTab === "logs" ? "50%" :
+                          activeDebugTab === "network" ? "66.6%" :
+                            activeDebugTab === "analysis" ? "83.3%" : "100%"
                       }`
                   }}
                 />
@@ -663,10 +734,10 @@ export default function Home() {
                   className="absolute h-2 w-2 rounded-full bg-[#2EA37A] -top-[3px] transition-all duration-500 ease-out"
                   style={{
                     left: `calc(${activeDebugTab === "audio" ? "16.6%" :
-                        activeDebugTab === "timeline" ? "33.3%" :
-                          activeDebugTab === "logs" ? "50%" :
-                            activeDebugTab === "network" ? "66.6%" :
-                              activeDebugTab === "analysis" ? "83.3%" : "100%"
+                      activeDebugTab === "timeline" ? "33.3%" :
+                        activeDebugTab === "logs" ? "50%" :
+                          activeDebugTab === "network" ? "66.6%" :
+                            activeDebugTab === "analysis" ? "83.3%" : "100%"
                       } - 4px)`
                   }}
                 />
@@ -1152,17 +1223,15 @@ export default function Home() {
                       {faq.q}
                     </span>
                     <span
-                      className={`w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold shrink-0 transition-transform duration-300 ${
-                        isOpen ? "rotate-45 text-[#2EA37A]" : ""
-                      }`}
+                      className={`w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 font-bold shrink-0 transition-transform duration-300 ${isOpen ? "rotate-45 text-[#2EA37A]" : ""
+                        }`}
                     >
                       +
                     </span>
                   </button>
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                      isOpen ? "max-h-[220px] border-t border-slate-200" : "max-h-0"
-                    }`}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "max-h-[220px] border-t border-slate-200" : "max-h-0"
+                      }`}
                   >
                     <p className="p-6 sm:p-8 text-xs sm:text-sm text-slate-650 leading-relaxed font-instrument">
                       {faq.a}
