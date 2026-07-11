@@ -12,9 +12,9 @@ Luminar is actively deployed on the **Stellar Mainnet**. The registry utilizes a
 
 | Contract Name | Contract ID | Explorer Link |
 | :--- | :--- | :--- |
-| **Luminar KYC Registry** | `CAGM5DYHKTAC3OG3HTJCCP4MNLD7EIQR74SLO3E3Q6BGAY4TEEP75M6U` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CAGM5DYHKTAC3OG3HTJCCP4MNLD7EIQR74SLO3E3Q6BGAY4TEEP75M6U) |
-| **ZK UltraHonk Verifier** | `CAF46OFBWDEDEWYPASUEAGM5UNLIVGM5X3TRDKEMBR6HHN363I6T2Z43` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CAF46OFBWDEDEWYPASUEAGM5UNLIVGM5X3TRDKEMBR6HHN363I6T2Z43) |
-| **Luminar Compliance SBT (LSBT)** | `CDMUHTTOS7HHIJAL7XKTTZABQWFW3O5CVAJXJ5RBFYQMLXORMJK4HOSG` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CDMUHTTOS7HHIJAL7XKTTZABQWFW3O5CVAJXJ5RBFYQMLXORMJK4HOSG) |
+| **Luminar KYC Registry** | `CCGSPB7P2PTI7SPUN2EGWPPCGL5SGNIZ7AAVFKBTFBSIY7XCMSOKHZ4B` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CCGSPB7P2PTI7SPUN2EGWPPCGL5SGNIZ7AAVFKBTFBSIY7XCMSOKHZ4B) |
+| **ZK UltraHonk Verifier** | `CCSIAHS2UOARAAEZW5CNV2RNJNOPOPSXM7J3FT764K6E4YZZFTCE76N6` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CCSIAHS2UOARAAEZW5CNV2RNJNOPOPSXM7J3FT764K6E4YZZFTCE76N6) |
+| **Luminar Compliance SBT (LSBT)** | `CB2Y2S7N6ERY6YAC6M2KCDPVF4CSEDVEHN5OIFIUQWA37BATYJBFZVBP` | [View on Stellar.expert](https://stellar.expert/explorer/public/contract/CB2Y2S7N6ERY6YAC6M2KCDPVF4CSEDVEHN5OIFIUQWA37BATYJBFZVBP) |
 
 ---
 
@@ -165,7 +165,7 @@ stellar contract deploy \
   --wasm contracts/registry/target/wasm32v1-none/release/registry.wasm \
   --source alice --network testnet
 
-# 4. Initialize KYC Registry (linking Verifier and SBT)
+# 4. Initialize KYC Registry (linking Verifier, SBT, and Oracles)
 stellar contract invoke \
   --id <REGISTRY_CONTRACT_ID> \
   --source alice --network testnet \
@@ -173,7 +173,10 @@ stellar contract invoke \
   -- initialize \
   --owner <OWNER_ADDRESS> \
   --verifier_contract <VERIFIER_CONTRACT_ID> \
-  --sbt_contract <SBT_CONTRACT_ID>
+  --sbt_contract <SBT_CONTRACT_ID> \
+  --oracle1 <ORACLE_1_RAW_PUBKEY_HEX> \
+  --oracle2 <ORACLE_2_RAW_PUBKEY_HEX> \
+  --oracle3 <ORACLE_3_RAW_PUBKEY_HEX>
 
 # 5. Initialize SBT (setting Registry as sole authorized admin)
 stellar contract invoke \
@@ -211,7 +214,8 @@ Configure `.env.local` inside `frontend/`:
 NEXT_PUBLIC_ORACLE_URL=http://localhost:3001
 NEXT_PUBLIC_REGISTRY_CONTRACT_ID=<YOUR_REGISTRY_CONTRACT_ID>
 NEXT_PUBLIC_VERIFIER_CONTRACT_ID=<YOUR_VERIFIER_CONTRACT_ID>
-NEXT_PUBLIC_NETWORK=testnet
+NEXT_PUBLIC_SBT_CONTRACT_ID=<YOUR_SBT_CONTRACT_ID>
+NEXT_PUBLIC_NETWORK=mainnet
 ```
 
 Run the development server:
