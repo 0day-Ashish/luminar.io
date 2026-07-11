@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { requestAttestations } from "../src/oracle";
 import { LuminarClient } from "../src/contracts";
 import { SDKConfig } from "../src/types";
