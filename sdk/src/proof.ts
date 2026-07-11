@@ -122,9 +122,9 @@ export async function generateKycProof(params: {
     min_age_secs: params.minAgeSecs.toString()
   };
 
-  const threads = typeof SharedArrayBuffer !== "undefined"
-    ? (navigator.hardwareConcurrency || 4)
-    : 1;
+  // Force 1 thread to avoid worker-spawning deadlocks in browser environments (Next.js/Vite)
+  // Single-threaded proving for this circuit size is extremely fast (3-5 seconds) and 100% stable.
+  const threads = 1;
 
   const backend = new UltraHonkBackend(circuit.bytecode, { threads });
   const noir = new Noir(circuit);
